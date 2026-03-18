@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIANE — Produtividade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #EAF6FB;
+      --surface: #ffffff;
+      --surface2: #D8F0FA;
+      --accent: #5BC4E8;
+      --accent2: #3AADD4;
+      --accent-soft: #B2E6F5;
+      --text: #1a2b35;
+      --text-muted: #6b8fa0;
+      --checked-line: #a0cedd;
+      --sidebar-w: 200px;
+      --radius: 18px;
+      --shadow: 0 4px 24px rgba(60,130,160,0.10);
+      --shadow-card: 0 2px 16px rgba(60,130,160,0.13);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 18px 24px;
+      border-right: 1.5px solid var(--accent-soft);
+      box-shadow: 2px 0 18px rgba(60,160,200,0.06);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--accent2);
+      margin-bottom: 36px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px solid var(--accent-soft);
+    }
+
+    .logo span { color: var(--text); }
+
+    nav { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 11px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--accent2); }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 16px;
+      border-top: 1.5px solid var(--accent-soft);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 32px 0;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .topbar-actions { display: flex; gap: 10px; }
+
+    .btn-new-list {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.12s;
+      box-shadow: 0 2px 12px rgba(91,196,232,0.25);
+    }
+    .btn-new-list:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-new-list:active { transform: translateY(0); }
+
+    /* lists container */
+    .lists-area {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 24px 32px 32px;
+      display: flex;
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    /* scrollbar */
+    .lists-area::-webkit-scrollbar { height: 6px; }
+    .lists-area::-webkit-scrollbar-track { background: transparent; }
+    .lists-area::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 99px; }
+
+    /* ── LIST CARD ── */
+    .list-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-card);
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: cardIn 0.35s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .list-header {
+      padding: 20px 20px 14px;
+      border-bottom: 1.5px solid var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-header-content { flex: 1; }
+
+    .list-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      border: none;
+      background: transparent;
+      width: 100%;
+      cursor: text;
+    }
+
+    .list-name:focus { color: var(--accent2); }
+
+    .list-period {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      outline: none;
+      border: none;
+      background: transparent;
+      width: 100%;
+      margin-top: 2px;
+      cursor: text;
+    }
+
+    .list-period:focus { color: var(--accent2); }
+
+    .btn-list-menu {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 7px;
+      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-list-menu:hover { background: var(--surface2); color: var(--text); }
+
+    /* tasks */
+    .task-list {
+      padding: 10px 12px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-height: 80px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 8px;
+      border-radius: 10px;
+      transition: background 0.15s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .task-item:hover { background: var(--bg); }
+
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent-soft);
+      border-radius: 5px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s, border-color 0.18s;
+      cursor: pointer;
+    }
+
+    .task-checkbox.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .task-checkbox.checked::after {
+      content: '';
+      display: block;
+      width: 5px;
+      height: 9px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    .task-label {
+      font-size: 0.88rem;
+      font-weight: 400;
+      line-height: 1.4;
+      color: var(--text);
+      flex: 1;
+      outline: none;
+      background: transparent;
+      border: none;
+      resize: none;
+      font-family: 'DM Sans', sans-serif;
+      cursor: text;
+      transition: color 0.15s;
+    }
+
+    .task-label:focus { color: var(--accent2); }
+
+    .task-item.done .task-label {
+      text-decoration: line-through;
+      color: var(--checked-line);
+    }
+
+    .task-delete {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      border-radius: 5px;
+      transition: opacity 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .task-item:hover .task-delete { opacity: 1; }
+    .task-delete:hover { background: #fee2e2; }
+
+    /* add task */
+    .add-task-row {
+      padding: 6px 12px 10px;
+    }
+
+    .btn-add-task {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: none;
+      border: 1.5px dashed var(--accent-soft);
+      border-radius: 9px;
+      width: 100%;
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .btn-add-task:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+      background: var(--surface2);
+    }
+
+    /* progress bar */
+    .list-footer {
+      padding: 0 20px 16px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .progress-bar {
+      height: 5px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── CREATE NEW CARD ── */
+    .create-card {
+      width: 200px;
+      height: 220px;
+      flex-shrink: 0;
+      border-radius: var(--radius);
+      border: 2px dashed var(--accent-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      background: rgba(255,255,255,0.5);
+      animation: cardIn 0.4s ease 0.2s both;
+    }
+
+    .create-card:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+
+    .create-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2.5px solid var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      color: var(--text);
+      font-weight: 300;
+      transition: border-color 0.18s, color 0.18s;
+    }
+
+    .create-card:hover .create-circle {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .create-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* ── MODAL (nova lista) ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(20,50,65,0.22);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px 28px 24px;
+      width: 340px;
+      box-shadow: 0 8px 40px rgba(30,100,130,0.18);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.25s ease;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .modal label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .modal input {
+      width: 100%;
+      border: 1.5px solid var(--accent-soft);
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color 0.18s;
+    }
+
+    .modal input:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 10px;
+      border: 1.5px solid var(--accent-soft);
+      border-radius: 10px;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: var(--bg); }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-confirm:hover { background: var(--accent2); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-emoji { font-size: 2rem; }
+
+    /* ── CONTEXT MENU ── */
+    .ctx-menu {
+      position: fixed;
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(30,100,130,0.18);
+      border: 1.5px solid var(--accent-soft);
+      padding: 6px;
+      z-index: 200;
+      min-width: 150px;
+      display: none;
+    }
+
+    .ctx-menu.open { display: block; }
+
+    .ctx-item {
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      color: var(--text);
+      transition: background 0.13s;
+    }
+
+    .ctx-item:hover { background: var(--bg); }
+    .ctx-item.danger { color: #f87171; }
+    .ctx-item.danger:hover { background: #fee2e2; }
+
+    /* scrollbar on task list */
+    .task-list { overflow-y: auto; max-height: 340px; }
+    .task-list::-webkit-scrollbar { width: 4px; }
+    .task-list::-webkit-scrollbar-thumb { background: var(--accent-soft); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">NI<span>ANE</span></div>
+  <nav>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">⏱</span> Pomodoro
+    </a>
+    <a class="nav-item active" href="#">
+      <span class="nav-icon">✓</span> My Lists
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">📄</span> Notes
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">🎵</span> Música
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="nav-item" href="#">
+      <span class="nav-icon">👤</span> Usuário
+    </a>
+    <a class="nav-item" href="#">
+      <span class="nav-icon">⚙️</span> Configurações
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <span class="topbar-title">My Lists</span>
+    <div class="topbar-actions">
+      <button class="btn-new-list" onclick="openModal()">
+        <span>+</span> Nova Lista
+      </button>
+    </div>
+  </header>
+
+  <div class="lists-area" id="listsArea">
+    <!-- lists rendered by JS -->
+    <div class="create-card" onclick="openModal()">
+      <div class="create-circle">+</div>
+      <span class="create-label">Create new Notes</span>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Nova Lista</h2>
+    <label>Nome da lista</label>
+    <input type="text" id="inputListName" placeholder="ex: Lista 3" />
+    <label>Período / subtítulo</label>
+    <input type="text" id="inputListPeriod" placeholder="ex: Sábado - Domingo" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmNewList()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item" id="ctxRename">✏️ Renomear</div>
+  <div class="ctx-item danger" id="ctxDelete">🗑 Excluir lista</div>
+</div>
+
+<script>
+  /* ---- DATA ---- */
+  let lists = [
+    {
+      id: 1, name: 'Lista 1', period: 'Seg - quarta',
+      tasks: [
+        { id: 1, text: 'Comer pão de batata', done: true },
+        { id: 2, text: 'Estudar às 10 horas.', done: false },
+        { id: 3, text: 'Vender pelucia do tung tung sahur', done: false },
+        { id: 4, text: 'Academia às 15 horas', done: false },
+      ]
+    },
+    {
+      id: 2, name: 'Lista 2', period: 'Quinta - Sexta',
+      tasks: [
+        { id: 1, text: 'Beber suco de maracujá', done: true },
+        { id: 2, text: 'Trabalhar das 8 hrs até as 18hrs.', done: true },
+        { id: 3, text: 'Vender pelucia do tralalero', done: false },
+        { id: 4, text: 'Jogar free fire', done: false },
+      ]
+    }
+  ];
+
+  let nextListId = 3;
+  let ctxTargetId = null;
+
+  /* ---- RENDER ---- */
+  function render() {
+    const area = document.getElementById('listsArea');
+    // remove cards (keep create-card)
+    area.querySelectorAll('.list-card').forEach(el => el.remove());
+
+    const createCard = area.querySelector('.create-card');
+
+    lists.forEach((list, idx) => {
+      const card = buildCard(list, idx);
+      area.insertBefore(card, createCard);
+    });
+  }
+
+  function buildCard(list, idx) {
+    const done = list.tasks.filter(t => t.done).length;
+    const total = list.tasks.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'list-card';
+    card.dataset.id = list.id;
+    card.style.animationDelay = `${idx * 0.07}s`;
+
+    card.innerHTML = `
+      <div class="list-header">
+        <div class="list-header-content">
+          <input class="list-name" value="${esc(list.name)}" data-field="name" data-id="${list.id}" />
+          <input class="list-period" value="${esc(list.period)}" data-field="period" data-id="${list.id}" />
+        </div>
+        <button class="btn-list-menu" data-id="${list.id}" title="Opções">⋯</button>
+      </div>
+      <div class="task-list" id="tasks-${list.id}">
+        ${list.tasks.length ? list.tasks.map(t => taskHTML(t, list.id)).join('') : emptyHTML()}
+      </div>
+      <div class="add-task-row">
+        <button class="btn-add-task" data-id="${list.id}">
+          <span>+</span> Adicionar tarefa
+        </button>
+      </div>
+      <div class="list-footer">
+        <div class="progress-label">
+          <span>Progresso</span>
+          <span>${done}/${total}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+
+    // events: checkbox toggle
+    card.querySelectorAll('.task-checkbox').forEach(cb => {
+      cb.addEventListener('click', e => {
+        e.stopPropagation();
+        const listId = +cb.dataset.listid;
+        const taskId = +cb.dataset.taskid;
+        toggleTask(listId, taskId);
+      });
+    });
+
+    // events: delete task
+    card.querySelectorAll('.task-delete').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        deleteTask(+btn.dataset.listid, +btn.dataset.taskid);
+      });
+    });
+
+    // events: add task
+    card.querySelector('.btn-add-task').addEventListener('click', () => {
+      addTask(list.id);
+    });
+
+    // events: edit name / period inline
+    card.querySelectorAll('[data-field]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const l = lists.find(x => x.id === +inp.dataset.id);
+        if (l) l[inp.dataset.field] = inp.value;
+      });
+    });
+
+    // events: context menu
+    card.querySelector('.btn-list-menu').addEventListener('click', e => {
+      e.stopPropagation();
+      openCtxMenu(e, list.id);
+    });
+
+    return card;
+  }
+
+  function taskHTML(t, listId) {
+    return `
+      <div class="task-item${t.done ? ' done' : ''}" data-taskid="${t.id}" data-listid="${listId}">
+        <div class="task-checkbox${t.done ? ' checked' : ''}" data-taskid="${t.id}" data-listid="${listId}"></div>
+        <textarea class="task-label" rows="1" data-taskid="${t.id}" data-listid="${listId}">${esc(t.text)}</textarea>
+        <button class="task-delete" data-taskid="${t.id}" data-listid="${listId}" title="Remover">✕</button>
+      </div>`;
+  }
+
+  function emptyHTML() {
+    return `<div class="empty-state"><span class="empty-emoji">🌿</span><span>Nenhuma tarefa ainda</span></div>`;
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ---- ACTIONS ---- */
+  function toggleTask(listId, taskId) {
+    const list = lists.find(l => l.id === listId);
+    const task = list?.tasks.find(t => t.id === taskId);
+    if (task) { task.done = !task.done; render(); }
+  }
+
+  function deleteTask(listId, taskId) {
+    const list = lists.find(l => l.id === listId);
+    if (list) { list.tasks = list.tasks.filter(t => t.id !== taskId); render(); }
+  }
+
+  let nextTaskId = 100;
+  function addTask(listId) {
+    const list = lists.find(l => l.id === listId);
+    if (!list) return;
+    const text = prompt('Nova tarefa:');
+    if (!text?.trim()) return;
+    list.tasks.push({ id: nextTaskId++, text: text.trim(), done: false });
+    render();
+  }
+
+  function deleteList(listId) {
+    lists = lists.filter(l => l.id !== listId);
+    render();
+  }
+
+  /* ---- MODAL ---- */
+  function openModal() {
+    document.getElementById('inputListName').value = '';
+    document.getElementById('inputListPeriod').value = '';
+    document.getElementById('modalOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('inputListName').focus(), 200);
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  function confirmNewList() {
+    const name = document.getElementById('inputListName').value.trim() || `Lista ${nextListId}`;
+    const period = document.getElementById('inputListPeriod').value.trim() || '';
+    lists.push({ id: nextListId++, name, period, tasks: [] });
+    render();
+    closeModal();
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  document.getElementById('inputListName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('inputListPeriod').focus();
+  });
+
+  document.getElementById('inputListPeriod').addEventListener('keydown', e => {
+    if (e.key === 'Enter') confirmNewList();
+  });
+
+  /* ---- CONTEXT MENU ---- */
+  function openCtxMenu(e, listId) {
+    ctxTargetId = listId;
+    const menu = document.getElementById('ctxMenu');
+    menu.classList.add('open');
+    const x = Math.min(e.clientX, window.innerWidth - 170);
+    const y = Math.min(e.clientY, window.innerHeight - 100);
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+  }
+
+  document.getElementById('ctxRename').addEventListener('click', () => {
+    const list = lists.find(l => l.id === ctxTargetId);
+    if (!list) return;
+    const newName = prompt('Novo nome:', list.name);
+    if (newName?.trim()) { list.name = newName.trim(); render(); }
+    closeCtxMenu();
+  });
+
+  document.getElementById('ctxDelete').addEventListener('click', () => {
+    if (confirm('Excluir esta lista?')) deleteList(ctxTargetId);
+    closeCtxMenu();
+  });
+
+  function closeCtxMenu() {
+    document.getElementById('ctxMenu').classList.remove('open');
+    ctxTargetId = null;
+  }
+
+  document.addEventListener('click', closeCtxMenu);
+
+  /* ---- AUTO-RESIZE TEXTAREA ---- */
+  document.addEventListener('input', e => {
+    if (e.target.classList.contains('task-label')) {
+      e.target.style.height = 'auto';
+      e.target.style.height = e.target.scrollHeight + 'px';
+
+      // update data
+      const listId = +e.target.dataset.listid;
+      const taskId = +e.target.dataset.taskid;
+      const list = lists.find(l => l.id === listId);
+      const task = list?.tasks.find(t => t.id === taskId);
+      if (task) task.text = e.target.value;
+    }
+  });
+
+  /* ---- INIT ---- */
+  render();
+</script>
+</body>
+</html>

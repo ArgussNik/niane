@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NIANE — Produtividade</title>
+  
+  <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #EAF6FB;
+      --surface: #ffffff;
+      --surface2: #D8F0FA;
+      --accent: #5BC4E8;
+      --accent2: #3AADD4;
+      --accent-soft: #B2E6F5;
+      --text: #1a2b35;
+      --text-muted: #6b8fa0;
+      --radius: 18px;
+      --sidebar-w: 220px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Barra do lado */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 18px 24px;
+      border-right: 1.5px solid var(--accent-soft);
+      box-shadow: 2px 0 18px rgba(60,160,200,0.06);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--accent2);
+      margin-bottom: 36px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px solid var(--accent-soft);
+    }
+
+    .logo span { color: var(--text); }
+
+    nav { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 11px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+      user-select: none;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--accent2); }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 16px;
+      border-top: 1.5px solid var(--accent-soft);
+    }
+    /* Parte principal */
+    .main-content {
+      flex: 1; padding: 40px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 30px;
+    }
+
+    .music-container {
+      background: var(--surface); padding: 24px;
+      border-radius: var(--radius); box-shadow: 0 4px 24px rgba(60,130,160,0.1);
+    }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+    .controls input {
+      flex: 1; padding: 12px 16px; border-radius: 12px;
+      border: 1.5px solid var(--accent-soft); outline: none;
+      font-family: inherit;
+    }
+    .controls button {
+      padding: 10px 24px; background: #1DB954; color: white;
+      border: none; border-radius: 20px; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
+    }
+    .controls button:hover { background: #17a34a; transform: scale(1.02); }
+
+    /* Parte do mp3 */
+    .mp3-container {
+      background: var(--surface); padding: 20px;
+      border-radius: var(--radius); box-shadow: 0 4px 24px rgba(60,130,160,0.1);
+      display: flex; flex-direction: column; gap: 15px;
+    }
+    .mp3-header {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .mp3-title { font-weight: 700; color: var(--accent2); font-size: 0.9rem; }
+    
+    .custom-file-upload {
+      background: var(--surface2); color: var(--accent2);
+      padding: 8px 16px; border-radius: 20px; cursor: pointer;
+      font-size: 0.8rem; font-weight: 600; transition: 0.2s;
+    }
+    .custom-file-upload:hover { background: var(--accent-soft); }
+
+    #local-player {
+      width: 100%; height: 40px;
+      filter: sepia(20%) saturate(70%) hue-rotate(160deg);
+    }
+    
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo">NI<span>ANE</span></div>
+    <nav>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">🏠</span> Home
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">⏱</span> Pomodoro
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">✓</span> My Lists
+      </a>
+      <a class="nav-item" href="#"> 
+        <span class="nav-icon">📄</span> Notes
+      </a>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">🎵</span> Música
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="nav-item" href="#">
+        <span class="nav-icon">👤</span> Usuário
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-icon">⚙️</span> Configurações
+      </a>
+    </div>
+  </aside>
+
+<main class="main-content">
+  <section class="music-container">
+    <div class="controls">
+      <input type="text" id="playlist-url" placeholder="Cole o link do álbum, playlist ou música aqui...">
+      <button id="load-btn">Carregar</button>
+    </div>
+    <div id="embed-iframe"></div>
+  </section>
+
+  <section class="mp3-container">
+    <div class="mp3-header">
+      <span class="mp3-title">PLAYER DE ÁUDIO LOCAL</span>
+      <label for="mp3-input" class="custom-file-upload">Selecionar MP3</label>
+      <input type="file" id="mp3-input" accept="audio/mp3" style="display: none;" />
+    </div>
+    <audio id="local-player" controls></audio>
+  </section>
+
+  <div class="lists-area" id="listsArea"></div>
+</main>
+
+<script>
+  // Código do spotify
+  let embedController;
+
+  window.onSpotifyIframeApiReady = (IFrameAPI) => {
+    const element = document.getElementById('embed-iframe');
+    const options = {
+      uri: 'spotify:playlist:37i9dQZF1DXcBWIGoYBM3M',
+      width: '100%',
+      height: '352'
+    };
+    IFrameAPI.createController(element, options, (controller) => {
+      embedController = controller;
+      console.log("API do Spotify Pronta.");
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadBtn = document.getElementById('load-btn');
+    const urlInput = document.getElementById('playlist-url');
+
+    loadBtn.addEventListener('click', () => {
+      const fullText = urlInput.value.trim();
+      if (!fullText) return;
+
+      console.log("Texto colado:", fullText);
+
+      const pattern = /(album|playlist|track|artist)[\/:][a-zA-Z0-9]+/g;
+      const found = fullText.match(pattern);
+
+      if (found && embedController) {
+        const cleanUri = "spotify:" + found[0].replace('/', ':');
+        
+        console.log("URI Gerada:", cleanUri);
+        embedController.loadUri(cleanUri);
+        urlInput.value = ""; 
+      } else {
+        alert("Link não reconhecido. Certifique-se de que o link contém 'album/', 'playlist/' ou 'track/'");
+      }
+    });
+
+    // Coisa do mp3
+    const mp3Input = document.getElementById('mp3-input');
+    const localPlayer = document.getElementById('local-player');
+
+    mp3Input.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const fileURL = URL.createObjectURL(file);
+        localPlayer.src = fileURL;
+        localPlayer.play();
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

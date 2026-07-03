@@ -124,6 +124,9 @@ O projeto busca facilitar a organização da rotina através de ferramentas como
 Projeto desenvolvido por:
 
 - Nicolas Henrique dos Santos de Lima
+- Alexandre Eitel Ladari
+- Nicolai Aleksandr Zilse
+- Evellen Hadassa Rodrigues Pereira
 - (Adicionar integrantes)
 
 ---

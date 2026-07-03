@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro</title>
+  <link rel="stylesheet" href="style1.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="logo">NI<span>ANE</span></div>
+      <nav>
+        <a class="nav-item" href="#">
+        <span class="nav-icon">🏠</span> Home
+      </a>
+        <a class="nav-item active" href="#">
+          <span class="nav-icon">⏱</span> Pomodoro
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">✓</span> My Lists
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">📄</span> Notes
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">🎵</span> Música
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a class="nav-item" href="#">
+          <span class="nav-icon">👤</span> Usuário
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-icon">⚙️</span> Configurações
+        </a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+        <center>
+        <h1>Pomodoro</h1>
+
+        <div class="modes" role="tablist" aria-label="Modos do Pomodoro">
+          <button class="mode active" id="mode-focus" data-minutes="25" aria-pressed="true">Foco (25 min)</button>
+          <button class="mode" id="mode-short-break" data-minutes="5" aria-pressed="false">Pausa curta (5 min)</button>
+        </div>
+
+        <div class="custom-times">
+          <label for="focus-time">Tempo de Foco (min):</label>
+          <input type="number" id="focus-time" value="25" min="1" max="60">
+          <label for="break-time">Tempo de Pausa (min):</label>
+          <input type="number" id="break-time" value="5" min="1" max="60">
+          <button id="apply-times">Aplicar</button>
+        </div>
+
+        <div class="clock">
+          <svg width="300" height="300" viewBox="0 0 300 300">
+            <circle cx="150" cy="150" r="140" stroke="#e0e0e0" stroke-width="10" fill="none"/>
+            <circle cx="150" cy="150" r="140" stroke="#00008B" stroke-width="10" fill="none" stroke-dasharray="880" stroke-dashoffset="0" id="progress-circle"/>
+          </svg>
+          <div id="timer-display" aria-live="polite">25:00</div>
+        </div>
+        </center>
+
+        <div class="controls">
+          <button id="start">Iniciar</button>
+          <button id="pause" disabled>Pausar</button>
+          <button id="reset">Resetar</button>
+        </div>
+
+        <center><p class="footer-text">Selecione um modo, depois clique em Iniciar. Pause ou reset sempre que precisar.</p></center>
+      </div>
+    </main>
+  </div>
+<script>
+    const modeButtons = document.querySelectorAll('.mode');
+    const display = document.getElementById('timer-display');
+    const startButton = document.getElementById('start');
+    const pauseButton = document.getElementById('pause');
+    const resetButton = document.getElementById('reset');
+    const focusInput = document.getElementById('focus-time');
+    const breakInput = document.getElementById('break-time');
+    const applyButton = document.getElementById('apply-times');
+    const progressCircle = document.getElementById('progress-circle');
+
+    let intervalId = null;
+    let currentSeconds = 25 * 60;
+    let totalSeconds = 25 * 60;
+    let activeMode = document.getElementById('mode-focus');
+
+    const circumference = 2 * Math.PI * 140;
+
+    function formatTime(seconds) {
+      const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${minutes}:${secs}`;
+    }
+
+    function updateTimerDisplay() {
+      display.textContent = formatTime(currentSeconds);
+      const progress = currentSeconds / totalSeconds;
+      const offset = (1 - progress) * circumference;
+      progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function setActiveMode(button) {
+      modeButtons.forEach((mode) => {
+        mode.classList.toggle('active', mode === button);
+        mode.setAttribute('aria-pressed', mode === button ? 'true' : 'false');
+      });
+
+      activeMode = button;
+      totalSeconds = Number(button.dataset.minutes) * 60;
+      currentSeconds = totalSeconds;
+      updateTimerDisplay();
+      stopTimer();
+    }
+
+    function applyCustomTimes() {
+      const focusMin = Number(focusInput.value);
+      const breakMin = Number(breakInput.value);
+      document.getElementById('mode-focus').dataset.minutes = focusMin;
+      document.getElementById('mode-focus').textContent = `Foco (${focusMin} min)`;
+      document.getElementById('mode-short-break').dataset.minutes = breakMin;
+      document.getElementById('mode-short-break').textContent = `Pausa curta (${breakMin} min)`;
+      if (activeMode) {
+        setActiveMode(activeMode);
+      }
+    }
+
+    function startTimer() {
+      if (intervalId !== null) return;
+      startButton.disabled = true;
+      pauseButton.disabled = false;
+
+      intervalId = setInterval(() => {
+        if (currentSeconds <= 0) {
+          stopTimer();
+          return;
+        }
+
+        currentSeconds -= 1;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      startButton.disabled = false;
+      pauseButton.disabled = true;
+    }
+
+    function pauseTimer() {
+      stopTimer();
+    }
+
+    function resetTimer() {
+      currentSeconds = totalSeconds;
+      updateTimerDisplay();
+      stopTimer();
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener('click', () => setActiveMode(button));
+    });
+
+    applyButton.addEventListener('click', applyCustomTimes);
+
+    startButton.addEventListener('click', startTimer);
+    pauseButton.addEventListener('click', pauseTimer);
+    resetButton.addEventListener('click', resetTimer);
+
+    updateTimerDisplay();
+  </script>
+   
+</body>
+</html>

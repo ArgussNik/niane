@@ -127,7 +127,7 @@ Projeto desenvolvido por:
 - Alexandre Eitel Ladari
 - Nicolai Aleksandr Zilse
 - Evellen Hadassa Rodrigues Pereira
-- (Adicionar integrantes)
+  
 
 ---
 

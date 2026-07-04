@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIANE — Notes</title>
+  <link rel="stylesheet" href="notes.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ── SIDEBAR PRINCIPAL ── -->
+  <aside class="sidebar">
+    <div class="logo">NI<span>ANE</span></div>
+    <nav>
+      <a class="nav-item" href="home.html">
+        <span class="nav-icon">🏠</span> Home
+      </a>
+      <a class="nav-item" href="pomodoro.html">
+        <span class="nav-icon">⏱</span> Pomodoro
+      </a>
+      <a class="nav-item" href="listas.html">
+        <span class="nav-icon">✓</span> My Lists
+      </a>
+      <a class="nav-item active" href="#">
+        <span class="nav-icon">📄</span> Notes
+      </a>
+      <a class="nav-item" href="musica.html">
+        <span class="nav-icon">🎵</span> Música
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="nav-item" href="Configs-Usuario.html">
+        <span class="nav-icon">👤</span> Usuário
+      </a>
+      <a class="nav-item" href="Configs-Usuario.html">
+        <span class="nav-icon">⚙️</span> Configurações
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════
+       VIEW 1 — GALERIA DE NOTAS
+  ══════════════════════════════════════ -->
+  <main class="content" id="viewGallery">
+
+    <div class="gallery-header">
+      <h1 class="gallery-title">Minhas Notas</h1>
+      <input class="search-input" type="text" placeholder="Pesquisar nota..." oninput="filterNotes(this.value)">
+    </div>
+
+    <!-- Grid de cards -->
+    <div class="notes-grid" id="notesGrid">
+      <!-- Cards gerados pelo JS -->
+    </div>
+
+    <!-- Botão criar nova nota -->
+    <div class="create-area">
+      <div class="create-btn" onclick="newNote()">
+        <div class="create-circle">+</div>
+        <span>Create new Notes</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════
+       VIEW 2 — EDITOR
+  ══════════════════════════════════════ -->
+  <main class="content hidden" id="viewEditor">
+
+    <div class="editor-layout">
+
+      <!-- Sidebar do editor -->
+      <aside class="editor-sidebar">
+        <button class="btn-back" onclick="backToGallery()">← Voltar</button>
+
+        <div class="editor-tools">
+
+          <!-- Fonte -->
+          <button class="tool-btn" onclick="toggleSelect('selectFont')">Fonte</button>
+          <select id="selectFont" class="tool-select hidden" onchange="applyFont(this.value)">
+            <option value="Arial">Arial</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Comic Sans MS">Comic Sans</option>
+          </select>
+
+          <!-- Tabela -->
+          <button class="tool-btn" onclick="insertTable()">Tabela</button>
+
+          <!-- Títulos -->
+          <button class="tool-btn title-h1" onclick="applyTitle('h1')">Título 1</button>
+          <button class="tool-btn title-h2" onclick="applyTitle('h2')">Título 2</button>
+          <button class="tool-btn title-h3" onclick="applyTitle('h3')">Título 3</button>
+          <button class="tool-btn title-h4" onclick="applyTitle('h4')">Título 4</button>
+
+          <!-- Cor do texto -->
+          <button class="tool-btn" onclick="document.getElementById('inputCor').click()">
+            🎨 Cor do texto
+          </button>
+          <input type="color" id="inputCor" class="hidden" oninput="applyColor(this.value)">
+
+          <!-- Lista de tarefas -->
+          <button class="tool-btn" onclick="insertChecklist()">☑ Lista de tarefas</button>
+        </div>
+      </aside>
+
+      <!-- Área de texto -->
+      <div class="editor-area">
+        <input
+          class="note-title-input"
+          id="noteTitleInput"
+          type="text"
+          placeholder="Título da nota..."
+          oninput="autoSave()"
+        >
+        <textarea
+          id="noteTextarea"
+          placeholder="Escreva algo..."
+          oninput="autoSave()"
+        ></textarea>
+        <span class="save-status" id="saveStatus">💾 Salvo</span>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal-overlay hidden" id="deleteModal">
+  <div class="modal-box">
+    <p>Deseja excluir esta nota?</p>
+    <div class="modal-actions">
+      <button onclick="cancelDelete()">Cancelar</button>
+      <button class="btn-danger" onclick="confirmDelete()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script src="notes.js"></script>
+
+</body>
+</html>

@@ -1,89 +1,118 @@
 <div align="center">
 
-# 🚀 NIANE
+# 🚀 NiAne
 
-### Uma plataforma de produtividade para organização pessoal, foco e gerenciamento de tarefas.
+### Sua central de produtividade, organização e evolução pessoal.
 
 <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-blue">
 <img src="https://img.shields.io/badge/License-MIT-green">
-<img src="https://img.shields.io/badge/HTML-5-orange">
-<img src="https://img.shields.io/badge/CSS-3-blue">
-<img src="https://img.shields.io/badge/JavaScript-ES6-yellow">
+<img src="https://img.shields.io/badge/HTML5-orange?logo=html5">
+<img src="https://img.shields.io/badge/CSS3-blue?logo=css3">
+<img src="https://img.shields.io/badge/JavaScript-ES6-yellow?logo=javascript">
 
 </div>
 
 ---
 
-# 📖 Sobre o projeto
+# 📌 Sobre o projeto
 
-O **NiAne** é um Web App desenvolvido como projeto acadêmico com o objetivo de reunir, em uma única plataforma, diversas ferramentas voltadas à produtividade e ao desenvolvimento pessoal.
+O **NiAne** é uma plataforma web de produtividade desenvolvida com o objetivo de centralizar ferramentas essenciais para organização pessoal, estudos e gerenciamento de rotina.
 
-A proposta é oferecer um ambiente intuitivo para que o usuário possa organizar tarefas, acompanhar seu progresso, manter o foco durante os estudos ou trabalho e registrar informações importantes.
+A ideia surgiu da necessidade de reunir, em um único ambiente, recursos que auxiliem o usuário a:
+
+* Organizar suas tarefas;
+* Planejar sua rotina;
+* Aumentar sua concentração;
+* Acompanhar seu desenvolvimento;
+* Criar hábitos mais produtivos.
+
+Mais do que uma simples lista de tarefas, o NiAne busca ser um ambiente de evolução pessoal, combinando organização, foco e acompanhamento de desempenho.
 
 ---
 
 # ✨ Funcionalidades
 
-- ✅ Gerenciamento de listas de tarefas
-- 📝 Sistema de notas
-- ⏱️ Timer Pomodoro
-- 📊 Dashboard de produtividade
-- 📅 Organização por datas
-- ⚡ Definição de prioridades
-- 👤 Sistema de Login e Cadastro
-- 🎵 Área para músicas de foco
-- 📈 Estatísticas de desempenho
+## 📋 Organização
+
+* ✅ Criação e gerenciamento de listas de tarefas
+* 📝 Sistema de notas pessoais
+* 📅 Organização por datas
+* ⚡ Definição de prioridades
+* ✔️ Controle de progresso das atividades
+
+## ⏳ Produtividade
+
+* ⏱️ Timer Pomodoro para sessões de foco
+* 📊 Dashboard de produtividade
+* 📈 Estatísticas de desempenho
+* 🎯 Ferramentas para acompanhamento de objetivos
+
+## 👤 Usuário
+
+* 🔐 Sistema de login e cadastro
+* ⚙️ Área de configurações pessoais
+* 🎨 Personalização da experiência
+
+## 🎵 Ambiente de foco
+
+* 🎧 Área de músicas para concentração
+* 🌱 Ambiente pensado para estudos e trabalho
 
 ---
 
-# 🛠 Tecnologias
+# 🛠 Tecnologias utilizadas
 
-Frontend
+## Frontend
 
-- HTML5
-- CSS3
-- JavaScript
+<div>
 
-Backend *(em desenvolvimento)*
+* HTML5
+* CSS3
+* JavaScript (ES6+)
 
-- Supabase
-- PostgreSQL
+</div>
 
-Ferramentas
+## Backend *(em desenvolvimento)*
 
-- Git
-- GitHub
-- Figma
-- VS Code
+* Supabase
+* PostgreSQL
 
----
+## Ferramentas
 
-# 🎨 Protótipo
-
-As interfaces foram desenvolvidas inicialmente no **Figma**, servindo como base para toda a implementação do sistema.
-
-Algumas telas incluem:
-
-- Login
-- Cadastro
-- Home
-- Listas
-- Pomodoro
-- Notas
-- Dashboard
-- Configurações
+* Git
+* GitHub
+* Visual Studio Code
+* Figma
 
 ---
 
-# 📂 Estrutura do Projeto
+# 🏗 Arquitetura do projeto
+
+O projeto utiliza uma organização modular, separando responsabilidades entre páginas, estilos e scripts:
 
 ```text
 NiAne/
 
-├── css/
-├── js/
 ├── assets/
+│
+├── css/
+│   ├── global.css
+│   └── estilos específicos das páginas
+│
+├── js/
+│   ├── funcionalidades gerais
+│   └── scripts individuais
+│
 ├── pages/
+│   ├── home.html
+│   ├── login.html
+│   ├── register.html
+│   ├── notes.html
+│   ├── lists.html
+│   ├── music.html
+│   ├── pomodoro.html
+│   └── settings.html
+│
 ├── index.html
 ├── README.md
 └── LICENSE
@@ -91,31 +120,63 @@ NiAne/
 
 ---
 
-# 🎯 Objetivos
+# 🎨 Design e prototipação
 
-O projeto busca facilitar a organização da rotina através de ferramentas como:
+Antes da implementação, as interfaces foram planejadas no **Figma**, permitindo estruturar a experiência do usuário e definir a identidade visual da aplicação.
 
-- Controle de tarefas
-- Organização de estudos
-- Gestão de tempo
-- Desenvolvimento de hábitos
-- Acompanhamento da produtividade
+Principais telas:
+
+* 🔐 Login
+* 📝 Cadastro
+* 🏠 Dashboard/Home
+* 📋 Listas
+* ⏱️ Pomodoro
+* 📝 Notas
+* 🎵 Música
+* ⚙️ Configurações
+
+---
+
+# 🎯 Objetivos do projeto
+
+O NiAne tem como propósito auxiliar usuários que desejam melhorar sua organização e produtividade através da tecnologia.
+
+Principais objetivos:
+
+* Melhorar gerenciamento de tempo;
+* Auxiliar estudantes e profissionais;
+* Incentivar criação de hábitos;
+* Facilitar planejamento diário;
+* Transformar organização em uma experiência simples e agradável.
 
 ---
 
 # 🚧 Roadmap
 
-- [x] Protótipo no Figma
-- [x] Estrutura inicial em HTML
-- [x] Layout responsivo
-- [x] Sistema de listas
-- [ ] Integração com Supabase
-- [ ] Login de usuários
-- [ ] Banco de dados
-- [ ] Dashboard funcional
-- [ ] Sistema de notas
-- [ ] Modo escuro
-- [ ] Deploy
+## Concluído
+
+* [x] Planejamento da ideia
+* [x] Protótipo no Figma
+* [x] Estrutura inicial HTML/CSS
+* [x] Interface responsiva
+* [x] Sistema de páginas
+* [x] Organização da arquitetura do projeto
+
+## Em desenvolvimento
+
+* [ ] Integração com Supabase
+* [ ] Autenticação de usuários
+* [ ] Banco de dados
+* [ ] Dashboard dinâmico
+* [ ] Sistema completo de notas
+* [ ] Estatísticas de produtividade
+
+## Futuro
+
+* [ ] Modo escuro
+* [ ] Aplicação mobile
+* [ ] Sistema de metas
+* [ ] Deploy online
 
 ---
 
@@ -123,28 +184,31 @@ O projeto busca facilitar a organização da rotina através de ferramentas como
 
 Projeto desenvolvido por:
 
-- Nicolas Henrique dos Santos de Lima
-- Alexandre Eitel Ladari
-- Nicolai Aleksandr Zilse
-- Evellen Hadassa Rodrigues Pereira
-  
+* **Nicolas Henrique dos Santos de Lima**
+* **Alexandre Eitel Ladari**
+* **Nicolai Aleksandr Zilse**
+* **Evellen Hadassa Rodrigues Pereira**
 
 ---
 
 # 📷 Preview
 
-> Em breve serão adicionadas imagens da aplicação em funcionamento.
+> Capturas da aplicação serão adicionadas em breve.
 
 ---
 
 # 📜 Licença
 
-Este projeto está licenciado sob a licença MIT.
+Este projeto está sob a licença **MIT**.
+
+Você pode utilizar, modificar e distribuir este projeto seguindo os termos definidos na licença.
 
 ---
 
 <div align="center">
 
-### ⭐ Se este projeto te interessou, deixe uma estrela no repositório!
+## ⭐ Gostou do projeto?
+
+Deixe uma estrela no repositório e acompanhe a evolução do NiAne 🚀
 
 </div>

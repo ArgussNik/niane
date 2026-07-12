@@ -4,7 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NIANE — Notes</title>
-  <link rel="stylesheet" href="notes.css">
+    <link rel="icon" type="image/png" href="../assets/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="shortcut icon" href="../assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+
+  <!-- Aplica o tema salvo ANTES do CSS carregar, para a sidebar já nascer
+       com a cor customizada (mesmo tema usado em todas as outras páginas). -->
+  <script src="../js/niane-theme-init.js"></script>
+
+  <!-- Comic Neue e Anton são fontes livres do Google Fonts com visual bem
+       parecido com Comic Sans MS e Impact (que são fontes proprietárias da
+       Microsoft e normalmente não existem fora do Windows/Office). Usamos
+       elas com nome próprio no seletor de fontes, em vez de fingir que são
+       "Comic Sans"/"Impact", porque são elas que de fato vão aparecer. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Anton&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/notes.css">
 </head>
 <body>
 
@@ -20,21 +41,21 @@
       <a class="nav-item" href="pomodoro.html">
         <span class="nav-icon">⏱</span> Pomodoro
       </a>
-      <a class="nav-item" href="listas.html">
+      <a class="nav-item" href="lists.html">
         <span class="nav-icon">✓</span> My Lists
       </a>
-      <a class="nav-item active" href="#">
+      <a class="nav-item active" href="notes.html">
         <span class="nav-icon">📄</span> Notes
       </a>
-      <a class="nav-item" href="musica.html">
+      <a class="nav-item" href="music.html">
         <span class="nav-icon">🎵</span> Música
       </a>
     </nav>
     <div class="sidebar-bottom">
-      <a class="nav-item" href="Configs-Usuario.html">
+      <a class="nav-item" href="#" id="nav-usuario">
         <span class="nav-icon">👤</span> Usuário
       </a>
-      <a class="nav-item" href="Configs-Usuario.html">
+      <a class="nav-item" href="#" id="nav-config">
         <span class="nav-icon">⚙️</span> Configurações
       </a>
     </div>
@@ -81,11 +102,28 @@
           <!-- Fonte -->
           <button class="tool-btn" onclick="toggleSelect('selectFont')">Fonte</button>
           <select id="selectFont" class="tool-select hidden" onchange="applyFont(this.value)">
+            <option value="" selected disabled>Fonte...</option>
             <option value="Arial">Arial</option>
             <option value="Georgia">Georgia</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Comic Sans MS">Comic Sans</option>
+            <option value="'Courier New', Courier, monospace">Courier New</option>
+            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+            <option value="'Comic Neue', cursive">Comic Neue</option>
+            <option value="'Anton', Impact, sans-serif">Anton</option>
+          </select>
+
+          <!-- Tamanho do texto -->
+          <button class="tool-btn" onclick="toggleSelect('selectFontSize')">Tamanho</button>
+          <select id="selectFontSize" class="tool-select hidden" onchange="applyFontSize(this.value)">
+            <option value="" selected disabled>Tamanho...</option>
+            <option value="12">12px</option>
+            <option value="14">14px</option>
+            <option value="16">16px</option>
+            <option value="18">18px</option>
+            <option value="20">20px</option>
+            <option value="24">24px</option>
+            <option value="28">28px</option>
+            <option value="32">32px</option>
+            <option value="40">40px</option>
           </select>
 
           <!-- Tabela -->
@@ -105,6 +143,8 @@
 
           <!-- Lista de tarefas -->
           <button class="tool-btn" onclick="insertChecklist()">☑ Lista de tarefas</button>
+
+          <p class="tool-hint">Selecione um trecho do texto e depois clique numa formatação para aplicar só nele.</p>
         </div>
       </aside>
 
@@ -117,11 +157,13 @@
           placeholder="Título da nota..."
           oninput="autoSave()"
         >
-        <textarea
+        <div
           id="noteTextarea"
-          placeholder="Escreva algo..."
+          class="note-editable"
+          contenteditable="true"
+          data-placeholder="Escreva algo..."
           oninput="autoSave()"
-        ></textarea>
+        ></div>
         <span class="save-status" id="saveStatus">💾 Salvo</span>
       </div>
 
@@ -142,7 +184,8 @@
   </div>
 </div>
 
-<script src="notes.js"></script>
+<script src="../js/notes.js"></script>
+<script src="../js/niane-shared.js" defer></script>
 
 </body>
 </html>

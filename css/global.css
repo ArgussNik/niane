@@ -1,0 +1,41 @@
+:root {
+  --bg: #EAF6FB;
+  --surface: #ffffff;
+  --surface2: #D8F0FA;
+  --accent: #5BC4E8;
+  --accent2: #3AADD4;
+  --accent-soft: #B2E6F5;
+  --accent3: #3AADD4;
+  --text: #1a2b35;
+  --text-muted: #6b8fa0;
+  --radius: 18px;
+  --sidebar-w: 220px;
+  --sidebar-b: 350px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+}
+

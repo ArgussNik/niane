@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel</title>
+    <link rel="icon" type="image/png" href="../assets/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="shortcut icon" href="../assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+
+    <!-- Aplica o tema salvo ANTES do CSS carregar (mesmo sistema usado em
+         todas as outras páginas), para esta tela nunca ficar "fora de sincronia". -->
+    <script src="../js/niane-theme-init.js"></script>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/settings.css">
+</head>
+<body>
+
+    <!-- Botões para abrir os popups -->
+    <div class="barra">
+        <button id="openConfig">⚙️ Configurações</button>
+        <button id="openUsuario">👤 Usuário</button>
+    </div>
+
+    <!-- Overlay único -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- ════════════════════════════════
+         POPUP: CONFIGURAÇÕES
+    ════════════════════════════════ -->
+    <div class="modal" id="popupConfig">
+        <button class="close-btn" id="closeConfig">
+            <b style="font-size: 20px;">✕</b>
+        </button>
+
+        <h2 style="text-align:center; color:#242424; margin:0; font-size:40px; font-weight:bold;">Configurações</h2><br>
+        <h2 style="text-align:center; color:#242424; margin:0;">Personalizar</h2>
+
+        <p style="text-align:center; color:#494949; margin-bottom:5px;">Temas:</p>
+        <div class="color-options">
+            <button class="btn-color color-1"  onclick="mudarCor('#fce7f3','#db2777','#db2777')"></button>
+            <button class="btn-color color-2"  onclick="mudarCor('#d1fae5','#059669','#059669')"></button>
+            <button class="btn-color color-3"  onclick="mudarCor('#2d3436','#ffffff','#5BC4E8')"></button>
+            <button class="btn-color color-4"  onclick="mudarCor('#8f60aa','#000000','#5e3d72')"></button>
+            <button class="btn-color color-5"  onclick="mudarCor('#ffffff','#000000','#3AADD4')"></button>
+            <button class="btn-color color-6"  onclick="mudarCor('#f0a24a','#000000','#f08000')"></button>
+            <button class="btn-color color-8"  onclick="mudarCor('#fff067','#000000','#b38f00')"></button>
+            <button class="btn-color color-9"  onclick="mudarCor('#F5F5DC','#3E2723','#8a5a34')"></button>
+            <button class="btn-color color-10" onclick="mudarCor('#ff6a6a','#701100','#c62828')"></button>
+        </div>
+
+        <hr style="width:100%; margin:20px 0; border:0; border-top:1px solid #eee;">
+        <p style="text-align:center; color:#313131; margin-bottom:10px;">Criar seu Tema:</p>
+        <div class="custom-theme-area">
+            <div class="input-group">
+                <label style="color:#000;">Fundo:</label>
+                <input type="color" id="inputBg" value="#EAF6FB">
+            </div>
+            <div class="input-group">
+                <label style="color:#000;">Texto:</label>
+                <input type="color" id="inputTexto" value="#333333">
+            </div>
+            <div class="input-group">
+                <label style="color:#000;">Destaque:</label>
+                <input type="color" id="inputAccent" value="#3AADD4">
+            </div>
+            <div class="input-group">
+                <label style="color:#000;">Destaque 2:</label>
+                <input type="color" id="inputAccent2" value="#3AADD4">
+            </div>
+        </div>
+        <p style="text-align:center; color:#8a8a8a; font-size:12px; margin-top:10px;">
+            "Destaque" é usado em links, botões e na sidebar. "Destaque 2" é usado nas barras de
+            progresso (Home, Pomodoro) — escolha cores que combinem com o fundo.
+        </p>
+
+        <div class="save-row">
+            <button type="button" class="btn-save-theme" id="btnSalvarTema">💾 Salvar tema</button>
+            <button type="button" class="btn-saved-themes" id="btnTemasSalvos" title="Temas salvos" aria-label="Ver temas salvos"></button>
+        </div>
+
+        <p style="text-align:center; color:#242424; margin-top:15px;">Tema clássico:</p>
+        <div class="color-classic">
+            <button class="btn-color color-7" onclick="mudarCor('#EAF6FB','#000000','#3AADD4')"></button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         POPUP: TEMAS SALVOS
+    ════════════════════════════════ -->
+    <div class="modal" id="popupTemasSalvos" style="width:90%; max-width:480px; padding:20px; max-height:85vh; overflow-y:auto;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+            <button class="back-btn" id="voltarConfig">← Voltar</button>
+            <button class="close-btn" id="closeTemasSalvos">
+                <b style="font-size: 20px;">✕</b>
+            </button>
+        </div>
+        <h2 style="text-align:center; color:#242424; margin:0; font-size:24px; font-weight:bold;">Temas salvos</h2>
+        <p style="text-align:center; color:#494949; font-size:13px; margin-top:6px;">Clique num tema para aplicar, ou no ✕ para apagar.</p>
+        <div class="saved-grid" id="savedGrid"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         POPUP: USUÁRIO
+    ════════════════════════════════ -->
+    <div class="modal" id="popupUsuario">
+        <button class="close-btn" id="closeUsuario">
+            <img src="../assets/images/fechar.png" alt="X" style="width:30px; display:block;"
+                 onerror="this.parentElement.innerHTML='✕'">
+        </button>
+
+        <p>Usuário:</p><br>
+        <center>
+            <a href="login.html">Login necessário</a>
+            <br><br>
+            <img src="../assets/images/user.png" alt="Avatar do usuário">
+            <p>Nome de usuário:</p><br>
+            <p>E-mail:</p>
+        </center>
+    </div>
+
+    <script src="../js/settings.js"></script>
+    <script src="../js/niane-shared.js" defer></script>
+</body>
+</html>

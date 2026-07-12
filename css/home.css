@@ -1,0 +1,161 @@
+
+    /* Principal */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 48px;
+    }
+
+    /* Painel esquerdo: agrupa o texto do pomodoro e o alternador,
+       alinhados à esquerda para não ficarem "colados" no círculo. */
+    .home-left-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-right: 8px;
+    }
+
+    /* Progresso */
+    .circle-1 {
+      height: 500px;
+      width: 500px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: conic-gradient(var(--accent3) 0%, #e0e0e0 0%);
+      transition: background 0.5s ease;
+    }
+
+    .circle-2 {
+      height: 460px;
+      width: 460px;
+      background: var(--bg);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .prog-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 5.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .prog-label {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  font-family: 'Syne', sans-serif;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 18px 24px;
+  border-right: 1.5px solid var(--accent-soft);
+  box-shadow: 2px 0 18px rgba(60, 160, 200, 0.06);
+  flex-shrink: 0;
+}
+
+
+    .sidebar2-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .task-card {
+        background: var(--surface);
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    .check-icon { color: #2ecc71; font-weight: bold; flex-shrink: 0; }
+
+    /* Lista dinâmica (sincronizada com listas.html): rola/arrasta quando
+       há muitas listas, sem empurrar o box de total pra fora da tela. */
+    #done-list {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+        margin-bottom: 10px;
+        cursor: grab;
+        scrollbar-width: thin;
+    }
+    #done-list.dragging { cursor: grabbing; user-select: none; }
+    #done-list::-webkit-scrollbar { width: 6px; }
+    #done-list::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 10px; opacity: .35; }
+
+    .list-card-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+    }
+    .list-card-title-row p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .list-summary-empty {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-align: center;
+        padding: 24px 6px;
+        line-height: 1.5;
+    }
+
+    /* Alternador Listas / Tarefas */
+    .progress-toggle {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+    .progress-toggle-btn {
+        border: none;
+        background: var(--surface);
+        color: var(--text-muted);
+        padding: 8px 22px;
+        border-radius: 999px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: background 0.18s, color 0.18s;
+    }
+    .progress-toggle-btn:hover { background: var(--surface2); }
+    .progress-toggle-btn.active {
+        background: var(--accent-soft);
+        color: var(--accent2);
+    }
+
+    .done-total-box {
+        margin-top: auto;
+        background: var(--accent3);
+        color: white;
+        padding: 25px;
+        border-radius: 20px;
+        text-align: center;
+        flex-shrink: 0;
+    }

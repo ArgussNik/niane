@@ -10,14 +10,27 @@
   --surface2: #92c2ed;
   --accent-soft: rgb(215, 230, 255);
   --accent2: #1f8ecd;
+  --accent3: #1f8ecd;
   --text: #1f2937;
   --text-muted: #566275;
   --bg: #d1f7fe;
+
+  /* aliases usados em listas.html — mantém tudo no mesmo sistema de tema
+     (niane-shared.js atualiza estes junto dos de cima quando o tema muda) */
+  --radius: 18px;
+  --accent: #5BC4E8;
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --card-bg: var(--surface);
+  --border: var(--accent-soft);
+  --accent-bg: var(--accent-soft);
+  --accent-text: var(--accent2);
+  --modal-overlay: rgba(0, 0, 0, 0.45);
 }
 
 body {
   font-family: sans-serif;
-  background: #b3e5f5;
+  background: var(--bg);
   height: 100vh;
   overflow: hidden;
 }
@@ -99,7 +112,7 @@ nav {
 /* ── MAIN CONTENT ── */
 .content {
   flex: 1;
-  background: #c8ecf8;
+  background: var(--surface2);
   padding: 28px 28px 20px;
   overflow-y: auto;
   display: flex;
@@ -119,7 +132,7 @@ nav {
   flex-shrink: 0;
   font-size: 2rem;
   font-weight: 800;
-  color: #1a2b35;
+  color: var(--accent);
 }
 
 /* ── LISTS ROW ── */

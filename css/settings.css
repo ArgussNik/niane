@@ -1,0 +1,182 @@
+        :root {
+            --bg-site: #EAF6FB;
+            --cor-primaria: #333;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-site);
+            color: var(--cor-primaria);
+            transition: background-color 0.5s ease;
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ── Barra de botões ── */
+        .barra {
+            display: flex;
+            gap: 10px;
+        }
+
+        .barra button {
+            padding: 8px 18px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+        .barra button:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+        /* ── Overlay compartilhado ── */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .overlay.active { display: block; }
+
+        /* ── Modal base ── */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ccc;
+            background: white;
+            z-index: 1000;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* ── Modal Configurações ── */
+        #popupConfig.active {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* ── Modal Usuário ── */
+        #popupUsuario.active {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 80%;
+            max-width: 900px;
+            min-height: 400px;
+            padding: 40px;
+        }
+
+        /* ── Modal Temas salvos ── */
+        #popupTemasSalvos.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Conteúdo de Configurações ── */
+        .color-options, .color-classic, .custom-theme-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .custom-theme-area {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px dashed #ccc;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .btn-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-color:hover { transform: scale(1.1); }
+
+        .color-1  { background-color: #fce7f3; border-color: #db2777; }
+        .color-2  { background-color: #d1fae5; border-color: #059669; }
+        .color-3  { background-color: #2d3436; border-color: #000000; }
+        .color-4  { background-color: #b698c7; border-color: #8f60aa; }
+        .color-5  { background-color: #ffffff;  border-color: #c5c5c5; }
+        .color-6  { background-color: #f0a24a; border-color: #f08000; }
+        .color-7  { background-color: #EAF6FB; border-color: #90deff; }
+        .color-8  { background-color: #fff067; border-color: #f0d800; }
+        .color-9  { background-color: #F5F5DC; border-color: #3E2723; }
+        .color-10 { background-color: #ff6a6a; border-color: #701100; }
+
+        /* ── Salvar tema + "bola" de temas salvos ── */
+        .save-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px; }
+        .btn-save-theme {
+            display: flex; align-items: center; gap: 6px; border: none; border-radius: 999px;
+            padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: #fff; cursor: pointer;
+            background: linear-gradient(135deg, #5BC4E8, #1f8ecd); transition: opacity 0.15s;
+        }
+        .btn-save-theme:hover { opacity: 0.88; }
+        .btn-saved-themes {
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; flex-shrink: 0;
+            border: 2px solid #fff; box-shadow: 0 0 0 1px #d8eef9; padding: 0;
+            background: conic-gradient(from 0deg, #ff2d55, #ff9500, #ffe600, #00c853, #00b8d9, #7c3aed, #ff2d55);
+            transition: transform 0.15s;
+        }
+        .btn-saved-themes:hover { transform: scale(1.12); }
+        .saved-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 14px; min-height: 40px; }
+        .saved-empty { color: #8a8a8a; font-size: 0.85rem; text-align: center; margin-top: 14px; }
+        .saved-swatch { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+        .saved-swatch button.swatch-apply {
+            width: 100%; height: 100%; border-radius: 50%; cursor: pointer;
+            border: 2px solid #fff; box-shadow: 0 0 0 1px #d8eef9; transition: transform 0.15s; padding: 0;
+        }
+        .saved-swatch button.swatch-apply:hover { transform: scale(1.1); }
+        .saved-swatch .swatch-del {
+            position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
+            border-radius: 50%; border: none; background: #c94b4b; color: #fff; font-size: 12px; line-height: 1;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,.25);
+        }
+        .back-btn {
+            background: none; border: none; cursor: pointer; color: var(--accent2, #3AADD4);
+            font-weight: 700; font-size: 0.85rem; align-self: flex-start; padding: 0;
+        }
+
+        /* ── Conteúdo de Usuário ── */
+        #popupUsuario center img { width: 30%; height: auto; }
+
+        .close-btn {
+            align-self: flex-end;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Links seguem a cor de destaque do tema, em vez da cor padrão do
+           navegador (que ficava roxa/azul e destoava de temas como o rosa). */
+        #popupUsuario a {
+            color: var(--accent2, #3AADD4);
+            font-weight: 600;
+        }
+        #popupUsuario a:visited { color: var(--accent2, #3AADD4); }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro</title>
+    <link rel="icon" type="image/png" href="../assets/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
+  <link rel="shortcut icon" href="../assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+
+  <!-- Aplica o tema salvo ANTES do CSS carregar, para a sidebar já nascer
+       com a cor customizada (mesmo tema usado em todas as outras páginas). -->
+  <script src="../js/niane-theme-init.js"></script>
+
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/pomodoro.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="logo">NI<span>ANE</span></div>
+      <nav>
+        <a class="nav-item" href="home.html">
+        <span class="nav-icon">🏠</span> Home
+      </a>
+        <a class="nav-item active" href="pomodoro.html">
+          <span class="nav-icon">⏱</span> Pomodoro
+        </a>
+        <a class="nav-item" href="lists.html">
+          <span class="nav-icon">✓</span> My Lists
+        </a>
+        <a class="nav-item" href="notes.html">
+          <span class="nav-icon">📄</span> Notes
+        </a>
+        <a class="nav-item" href="music.html">
+          <span class="nav-icon">🎵</span> Música
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a class="nav-item" href="#" id="nav-usuario">
+          <span class="nav-icon">👤</span> Usuário
+        </a>
+        <a class="nav-item" href="#" id="nav-config">
+          <span class="nav-icon">⚙️</span> Configurações
+        </a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="container">
+        <center>
+        <h1>Pomodoro</h1>
+
+        <div class="modes" role="tablist" aria-label="Modos do Pomodoro">
+          <button class="mode active" id="mode-focus" data-minutes="25" data-phase="focus" aria-pressed="true">Foco (25 min)</button>
+          <button class="mode" id="mode-short-break" data-minutes="5" data-phase="short" aria-pressed="false">Pausa curta (5 min)</button>
+          <button class="mode" id="mode-long-break" data-minutes="15" data-phase="long" aria-pressed="false">Pausa longa (15 min)</button>
+        </div>
+
+        <div class="custom-times">
+          <label for="focus-time">Foco (min):</label>
+          <input type="number" id="focus-time" value="25" min="1" max="60">
+          <label for="break-time">Pausa curta (min):</label>
+          <input type="number" id="break-time" value="5" min="1" max="60">
+          <label for="long-break-time">Pausa longa (min):</label>
+          <input type="number" id="long-break-time" value="15" min="1" max="60">
+          <button id="apply-times">Aplicar</button>
+        </div>
+
+        <div class="loop-config">
+          <label for="cycles-count">Nº de ciclos antes da pausa longa:</label>
+          <input type="number" id="cycles-count" value="4" min="1" max="12">
+          <label class="loop-toggle-label" for="auto-loop-toggle">
+            <input type="checkbox" id="auto-loop-toggle">
+            Loop automático (Foco → Pausa curta → repetir → Pausa longa)
+          </label>
+        </div>
+
+        <div id="loop-status" class="loop-status" aria-live="polite"></div>
+
+        <div class="clock">
+          <svg width="300" height="300" viewBox="0 0 300 300">
+            <circle cx="150" cy="150" r="140" stroke-width="10" fill="none" id="progress-track"/>
+            <circle cx="150" cy="150" r="140" stroke-width="10" fill="none" stroke-dasharray="880" stroke-dashoffset="0" id="progress-circle"/>
+          </svg>
+          <div id="timer-display" aria-live="polite">25:00</div>
+        </div>
+        </center>
+
+        <div class="controls">
+          <button id="start">Iniciar</button>
+          <button id="pause" disabled>Pausar</button>
+          <button id="reset">Resetar</button>
+        </div>
+
+        <center><p class="footer-text">Selecione um modo, depois clique em Iniciar. Pause ou reset sempre que precisar.</p></center>
+      </div>
+    </main>
+  </div>
+<!-- niane-shared.js precisa ter rodado ANTES do script abaixo, porque é
+       ele quem guarda e atualiza o estado do Pomodoro (para o timer
+       continuar contando mesmo se você mudar de página). Importante:
+       "defer" só é respeitado pelo navegador em <script src="...">
+       (script EXTERNO) — em script INLINE (sem src, como o de baixo) o
+       atributo defer é ignorado e o código roda imediatamente durante o
+       carregamento da página. Por isso não dá pra confiar em "defer" pra
+       garantir a ordem aqui: em vez disso, esperamos o evento
+       DOMContentLoaded, que só dispara depois que todo script externo
+       com defer (o niane-shared.js) já rodou. -->
+  <script src="../js/niane-shared.js" defer></script>
+  <script src="../js/pomodoro.js"></script>
+</body>
+</html>

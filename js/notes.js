@@ -14,6 +14,11 @@
      - Tabela e lista de tarefas são inseridas como HTML na posição do cursor
      - Autosave (debounced) em localStorage, guardando o innerHTML da nota
    ========================================================================== */
+const SUPABASE_URL = https://unrzglexlphrytpagswy.supabase.co/rest/v1/
+const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVucnpnbGV4bHBocnl0cGFnc3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMzE5MDUsImV4cCI6MjA5ODYwNzkwNX0.pE4M3Mcu-QOAK8wwtMDeEFuvkq6OPEFflDlyPytIQpA
+
+
+
 (function () {
   'use strict';
 

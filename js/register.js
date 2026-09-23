@@ -14,3 +14,16 @@
                 olho.alt = "Mostrar senha";
             }
         }
+
+        const registerForm = document.querySelector('.auth-card form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                cadastrarUsuario(
+                    document.getElementById('campoEmail').value.trim(),
+                    document.getElementById('campoSenha').value,
+                    document.getElementById('campoUsuario').value.trim(),
+                    document.getElementById('campoAtualizacoes').checked
+                );
+            });
+        }

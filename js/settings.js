@@ -17,6 +17,28 @@
   const inputTexto = document.getElementById('inputTexto');
   const inputAccent = document.getElementById('inputAccent');
   const inputAccent2 = document.getElementById('inputAccent2');
+  const loginUsuario = document.getElementById('loginUsuario');
+  const nomeUsuario = document.getElementById('nomeUsuario');
+  const emailUsuario = document.getElementById('emailUsuario');
+
+  async function carregarUsuario() {
+    if (!window.supabase || !loginUsuario) return;
+
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return;
+
+    const usuario = data.user;
+    const metadata = usuario.user_metadata || {};
+    loginUsuario.textContent = 'Sair';
+    loginUsuario.href = '#';
+    loginUsuario.addEventListener('click', async (event) => {
+      event.preventDefault();
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+    if (nomeUsuario) nomeUsuario.textContent = metadata.username || 'Não informado';
+    if (emailUsuario) emailUsuario.textContent = usuario.email || 'Não informado';
+  }
 
   function preencherInputsComTemaAtual() {
     const cs = getComputedStyle(document.documentElement);
@@ -153,4 +175,5 @@
   }
 
   preencherInputsComTemaAtual();
+  carregarUsuario();
 })();

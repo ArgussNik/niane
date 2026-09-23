@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/HTML5-orange?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
 <img src="https://img.shields.io/badge/CSS3-blue?style=flat-square&logo=css3&logoColor=white" alt="CSS3">
 <img src="https://img.shields.io/badge/JavaScript-ES6-yellow?style=flat-square&logo=javascript&logoColor=black" alt="JavaScript">
-<img src="https://img.shields.io/badge/Supabase-em%20breve-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase">
+<img src="https://img.shields.io/badge/Supabase-integrado-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase">
 <img src="https://img.shields.io/github/stars/ArgussNik/niane?style=flat-square" alt="Stars">
 
 </div>
@@ -161,11 +161,11 @@ O NiAne tem como propósito auxiliar usuários que desejam melhorar sua organiza
 - [x] Organização modular do projeto (`assets/`, `css/`, `js/`, `pages/`)
 
 **Em desenvolvimento**
-- [ ] Integração com Supabase
-- [ ] Autenticação de usuários
+- [x] Integração inicial com Supabase Auth
+- [x] Cadastro e login de usuários
 - [ ] Banco de dados
 - [ ] Dashboard dinâmico
-- [ ] Sistema completo de notas
+- [x] Sistema local de notas
 - [ ] Estatísticas de produtividade
 
 **Futuro**

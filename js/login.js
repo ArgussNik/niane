@@ -14,3 +14,14 @@
                 olho.alt = "Mostrar senha";
             }
         }
+
+        const loginForm = document.querySelector('.auth-card form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                fazerLogin(
+                    document.getElementById('campoEmail').value.trim(),
+                    document.getElementById('campoSenha').value
+                );
+            });
+        }

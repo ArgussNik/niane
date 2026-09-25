@@ -35,17 +35,27 @@
     return buffer;
   }
 
-  // Ruído "marrom" (mais grave e encorpado que o branco), obtido
-  // integrando o ruído branco amostra a amostra.
-  function createBrownNoiseBuffer(ctx, seconds) {
+  // Ruído "rosa" (pink noise): energia distribuída de forma mais
+  // equilibrada entre graves e agudos do que o ruído marrom — é o
+  // tipo de ruído normalmente usado em apps de foco/white noise,
+  // porque fica claramente audível em qualquer alto-falante.
+  // Algoritmo de Paul Kellet (aproximação padrão de pink noise).
+  function createPinkNoiseBuffer(ctx, seconds) {
     const bufferSize = ctx.sampleRate * seconds;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    let last = 0;
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
     for (let i = 0; i < bufferSize; i++) {
       const white = Math.random() * 2 - 1;
-      last = (last + 0.02 * white) / 1.02;
-      data[i] = last * 3.5; // compensa a perda de amplitude da integração
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.96900 * b2 + white * 0.1538520;
+      b3 = 0.86650 * b3 + white * 0.3104856;
+      b4 = 0.55000 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.0168980;
+      const pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+      b6 = white * 0.115926;
+      data[i] = pink * 0.11; // normaliza pra ficar na faixa -1..1
     }
     return buffer;
   }
@@ -123,17 +133,19 @@
     };
   }
 
-  // Foco: ruído grave e contínuo (ruído marrom filtrado),
-  // sem variações, para mascarar distrações.
+  // Foco: ruído contínuo e estável (ruído rosa levemente filtrado),
+  // sem variações, para mascarar distrações. Mantém corte suave nos
+  // agudos pra soar "estável" em vez de "chiado", mas com energia
+  // suficiente em médios/graves para ser audível em qualquer caixa.
   function buildFoco(ctx) {
-    const source = makeNoiseSource(ctx, createBrownNoiseBuffer(ctx, 4));
+    const source = makeNoiseSource(ctx, createPinkNoiseBuffer(ctx, 4));
 
     const lowpass = ctx.createBiquadFilter();
     lowpass.type = 'lowpass';
-    lowpass.frequency.value = 250;
+    lowpass.frequency.value = 2200;
 
     const gain = ctx.createGain();
-    gain.gain.value = 0.35;
+    gain.gain.value = 0.4;
 
     source.connect(lowpass);
     lowpass.connect(gain);

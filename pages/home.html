@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NIANE — Produtividade</title>
     <link rel="icon" type="image/png" href="../assets/icons/favicon-96x96.png" sizes="96x96">
   <link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg">
@@ -46,11 +48,24 @@
       <div style="text-align: left; margin-bottom: 20px;">
         Tempo Total de Pomodoro: <br>
         Horas: <span id="pomodoro-horas">0</span> | Minutos: <span id="pomodoro-minutos">0</span>
+        <br><small class="home-muted" id="pomodoro-sessoes">Sessões de foco concluídas: 0</small>
       </div>
 
       <div class="progress-toggle" id="progress-toggle">
         <button type="button" class="progress-toggle-btn" data-mode="listas">Listas</button>
         <button type="button" class="progress-toggle-btn" data-mode="tarefas">Tarefas</button>
+      </div>
+      <div class="home-stats" id="home-stats" aria-live="polite">
+        <div class="home-stat"><strong id="stat-tarefas-total">0</strong><span>Tarefas</span></div>
+        <div class="home-stat"><strong id="stat-tarefas-feitas">0</strong><span>Concluídas</span></div>
+        <div class="home-stat"><strong id="stat-tarefas-pendentes">0</strong><span>Pendentes</span></div>
+        <div class="home-stat"><strong id="stat-listas">0</strong><span>Listas</span></div>
+        <div class="home-stat"><strong id="stat-foco-hoje">0</strong><span>Focos hoje</span></div>
+        <div class="home-stat"><strong id="stat-foco-semana">0 min</strong><span>Foco (7 dias)</span></div>
+      </div>
+      <div class="home-notes">
+        <p class="home-muted">Notas recentes</p>
+        <ul id="recent-notes"></ul>
       </div>
     </div>
 
@@ -77,8 +92,18 @@
     </div>
   </aside>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0"></script>
   <script src="../js/supabase.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/services/profile.service.js"></script>
+  <script src="../js/services/tasks.service.js"></script>
+  <script src="../js/services/lists.service.js"></script>
+  <script src="../js/services/notes.service.js"></script>
+  <script src="../js/services/pomodoro.service.js"></script>
+  <script src="../js/services/dashboard.service.js"></script>
+  <script src="../js/services/migration.service.js"></script>
+  <script src="../js/app.js"></script>
   <script src="../js/niane-shared.js" defer></script>
   <script src="../js/home.js"></script>
 </body>

@@ -1,99 +1,121 @@
 /* ==========================================================================
    NIANE — notes.js
    --------------------------------------------------------------------------
-   A área de edição agora é uma div "contenteditable" (em vez de <textarea>),
-   porque um textarea não suporta estilos diferentes dentro do mesmo campo —
-   qualquer CSS aplicado nele vale para o texto inteiro.
+   As notas vivem no Supabase (NianeServices.notes); o RLS do banco garante
+   que cada usuário só vê e altera as próprias.
 
-   Com contenteditable, cada formatação (Fonte, Tamanho, Cor, Título) é
-   aplicada envolvendo apenas o TRECHO SELECIONADO em um <span> com o estilo
-   correspondente, preservando o resto do texto como estava.
+   A área de edição é uma div "contenteditable": cada formatação (Fonte,
+   Tamanho, Cor, Título) envolve só o TRECHO SELECIONADO em um <span> com
+   estilo, preservando o resto do texto.
 
      - Galeria de notas (cards, busca, criar, excluir)
      - Editor rich-text simples: formatação por seleção
-     - Tabela e lista de tarefas são inseridas como HTML na posição do cursor
-     - Autosave (debounced) em localStorage, guardando o innerHTML da nota
+     - Tabela e lista de tarefas inseridas como HTML na posição do cursor
+     - Autosave com debounce, estado de salvamento, retry e proteção contra
+       sobrescrita (concorrência otimista por updated_at)
+   O HTML do editor é sanitizado (lista de tags/estilos permitidos) ao ser
+   exibido e ANTES de ser gravado.
    ========================================================================== */
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'niane-notes';
+  var U = window.NianeUtils;
+  var S = window.NianeServices;
 
-  const galleryView = document.getElementById('viewGallery');
-  const editorView = document.getElementById('viewEditor');
-  const notesGrid = document.getElementById('notesGrid');
-  const titleInput = document.getElementById('noteTitleInput');
-  const textarea = document.getElementById('noteTextarea'); // div contenteditable
-  const saveStatus = document.getElementById('saveStatus');
-  const deleteModal = document.getElementById('deleteModal');
+  var galleryView = document.getElementById('viewGallery');
+  var editorView = document.getElementById('viewEditor');
+  var notesGrid = document.getElementById('notesGrid');
+  var titleInput = document.getElementById('noteTitleInput');
+  var textarea = document.getElementById('noteTextarea'); // div contenteditable
+  var saveStatus = document.getElementById('saveStatus');
+  var deleteModal = document.getElementById('deleteModal');
 
-  let notes = loadNotes();
-  let currentId = null;
-  let pendingDeleteId = null;
-  let saveTimer = null;
-  let savedRange = null; // última seleção de texto feita dentro do editor
+  // notas em memória: { id, title, content, created_at, updated_at }
+  var notes = [];
+  var currentId = null;
+  var pendingDeleteId = null;
+  var savedRange = null; // última seleção de texto feita dentro do editor
+  var loadError = null;
 
-  function loadNotes() {
+  var AUTOSAVE_MS = 800;
+  var RETRY_DELAYS = [3000, 8000, 20000, 45000];
+
+  var dirty = false;          // há alterações ainda não confirmadas pelo servidor
+  var saving = false;         // uma gravação está em andamento
+  var saveAgain = false;      // houve edição durante a gravação
+  var retryTimer = null;
+  var retryCount = 0;
+
+  function formatDate(ts) { return U.formatDateBR(ts); }
+  function currentNote() { return notes.find(function (n) { return n.id === currentId; }) || null; }
+
+  function setStatus(text) { if (saveStatus) saveStatus.textContent = text; }
+
+  /* ------------------------------------------------------------------------
+     Carregamento
+     ------------------------------------------------------------------------ */
+  async function carregar() {
+    U.renderState(notesGrid, 'loading', 'Carregando suas notas…');
     try {
-      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (Array.isArray(raw)) return raw;
-    } catch (e) {}
-    return [];
+      var user = await window.NianeApp.ready;
+      try {
+        var mig = await S.migration.migrateNotes(user.id);
+        if (mig.migrated) U.toast('Importamos ' + mig.notes + ' nota(s) que estavam salvas neste navegador.', 'success', 5000);
+      } catch (migErr) {
+        U.reportError(migErr); // tentará de novo no próximo carregamento
+      }
+      notes = await S.notes.list();
+      loadError = null;
+      renderGallery(currentSearch());
+    } catch (err) {
+      if (err && err.kind === 'auth') return; // app.js redireciona para o login
+      loadError = U.toNianeError(err);
+      U.renderState(notesGrid, 'error', loadError.message, carregar);
+    }
   }
 
-  function persist() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); } catch (e) {}
-  }
-
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, (c) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    }[c]));
-  }
-
-  function htmlToText(html) {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html || '';
-    return tmp.textContent || tmp.innerText || '';
-  }
-
-  function formatDate(ts) {
-    const d = new Date(ts);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  function currentSearch() {
+    var input = document.querySelector('.search-input');
+    return input ? input.value : '';
   }
 
   /* ------------------------------------------------------------------------
      Galeria
      ------------------------------------------------------------------------ */
   function renderGallery(filter) {
-    const term = (filter || '').trim().toLowerCase();
-    const list = notes
+    if (loadError) return;
+    var term = (filter || '').trim().toLowerCase();
+    var list = notes
       .slice()
-      .sort((a, b) => b.updatedAt - a.updatedAt)
-      .filter(n => !term || (n.title + ' ' + htmlToText(n.content)).toLowerCase().includes(term));
+      .sort(function (a, b) { return new Date(b.updated_at) - new Date(a.updated_at); })
+      .filter(function (n) {
+        return !term || (n.title + ' ' + U.htmlToText(n.content)).toLowerCase().indexOf(term) !== -1;
+      });
 
     if (!list.length) {
-      notesGrid.innerHTML = `<p style="color:#88b0c2;font-size:0.85rem;padding:8px 4px;">
-        ${notes.length ? 'Nenhuma nota encontrada.' : 'Você ainda não tem notas. Crie a primeira abaixo!'}
-      </p>`;
+      U.renderState(notesGrid, 'empty', notes.length
+        ? 'Nenhuma nota encontrada.'
+        : 'Você ainda não tem notas. Crie a primeira abaixo!');
       return;
     }
 
-    notesGrid.innerHTML = list.map(n => `
-      <div class="note-card" data-id="${n.id}">
-        <div class="note-card-title">${escapeHtml(n.title || 'Sem título')}</div>
-        <div class="note-card-preview">${escapeHtml(htmlToText(n.content))}</div>
-        <div class="note-card-footer">
-          <span class="note-card-date">${formatDate(n.updatedAt)}</span>
-          <button class="btn-delete-card" title="Excluir nota">🗑️</button>
-        </div>
-      </div>
-    `).join('');
+    notesGrid.innerHTML = list.map(function (n) {
+      var preview = U.htmlToText(n.content).slice(0, 240);
+      return '' +
+        '<div class="note-card" data-id="' + U.escapeHtml(n.id) + '">' +
+          '<div class="note-card-title">' + U.escapeHtml(n.title || 'Sem título') + '</div>' +
+          '<div class="note-card-preview">' + U.escapeHtml(preview) + '</div>' +
+          '<div class="note-card-footer">' +
+            '<span class="note-card-date">' + formatDate(n.updated_at) + '</span>' +
+            '<button class="btn-delete-card" title="Excluir nota">🗑️</button>' +
+          '</div>' +
+        '</div>';
+    }).join('');
 
-    notesGrid.querySelectorAll('.note-card').forEach(card => {
-      const id = card.getAttribute('data-id');
-      card.addEventListener('click', () => openNote(id));
-      card.querySelector('.btn-delete-card').addEventListener('click', (e) => {
+    notesGrid.querySelectorAll('.note-card').forEach(function (card) {
+      var id = card.getAttribute('data-id');
+      card.addEventListener('click', function () { openNote(id); });
+      card.querySelector('.btn-delete-card').addEventListener('click', function (e) {
         e.stopPropagation();
         requestDelete(id);
       });
@@ -106,46 +128,197 @@
      Editor
      ------------------------------------------------------------------------ */
   function openNote(id) {
-    const note = notes.find(n => n.id === id);
+    var note = notes.find(function (n) { return n.id === id; });
     if (!note) return;
     currentId = id;
+    dirty = false; saving = false; saveAgain = false; retryCount = 0;
+    clearTimeout(retryTimer);
     titleInput.value = note.title || '';
-    textarea.innerHTML = note.content || '';
+    textarea.innerHTML = U.sanitizeNoteHtml(note.content || '');
     savedRange = null;
     galleryView.classList.add('hidden');
     editorView.classList.remove('hidden');
-    saveStatus.textContent = '💾 Salvo';
+    setStatus('💾 Salvo');
     textarea.focus();
   }
 
   window.newNote = function () {
-    const note = { id: 'n' + Date.now(), title: '', content: '', updatedAt: Date.now() };
-    notes.push(note);
-    persist();
-    openNote(note.id);
+    var btn = document.querySelector('.create-btn');
+    return U.withBusy(btn, async function () {
+      try {
+        var row = await S.notes.create({ title: '', content: '' });
+        notes.push(row);
+        openNote(row.id);
+      } catch (err) {
+        U.reportError(err, 'Não foi possível criar a nota.');
+      }
+    });
   };
 
-  window.backToGallery = function () {
+  /* Salva tudo que está pendente e só então volta para a galeria. Se o
+     servidor não aceitar, o usuário continua na nota (nada é perdido). */
+  window.backToGallery = async function () {
+    if (currentId && (dirty || saving)) {
+      debouncedSave.cancel();
+      var ok = await persistCurrent();
+      if (!ok && dirty) {
+        U.toast('Ainda não foi possível salvar esta nota. Fique aqui até a conexão voltar.', 'error');
+        return;
+      }
+    }
+    clearTimeout(retryTimer);
     editorView.classList.add('hidden');
     galleryView.classList.remove('hidden');
     currentId = null;
-    renderGallery(document.querySelector('.search-input') ? document.querySelector('.search-input').value : '');
+    renderGallery(currentSearch());
   };
 
+  /* ------------------------------------------------------------------------
+     Autosave
+     ------------------------------------------------------------------------ */
+  var debouncedSave = U.debounce(function () { persistCurrent(); }, AUTOSAVE_MS);
+
+  // Chamado pelos oninput do título e do editor.
   window.autoSave = function () {
     if (!currentId) return;
-    saveStatus.textContent = '💾 Salvando...';
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      const note = notes.find(n => n.id === currentId);
-      if (!note) return;
-      note.title = titleInput.value;
-      note.content = textarea.innerHTML;
-      note.updatedAt = Date.now();
-      persist();
-      saveStatus.textContent = '💾 Salvo';
-    }, 500);
+    dirty = true;
+    setStatus('💾 Salvando...');
+    debouncedSave();
   };
+
+  /* Grava a nota atual. Retorna true se ficou tudo salvo. */
+  async function persistCurrent() {
+    var note = currentNote();
+    if (!note) return true;
+    if (saving) { saveAgain = true; return false; }
+    if (!dirty) return true;
+
+    clearTimeout(retryTimer);
+    saving = true;
+    dirty = false; // edições feitas durante a gravação voltam a marcar dirty
+    var sentTitle = titleInput.value;
+    var sentContent = textarea.innerHTML;
+    var failed = false;
+
+    try {
+      var row = await S.notes.update(note.id, { title: sentTitle, content: sentContent },
+        { expectedUpdatedAt: note.updated_at });
+      Object.assign(note, row);
+      retryCount = 0;
+    } catch (err) {
+      failed = true;
+      dirty = true;
+      var e = U.toNianeError(err);
+      if (e.kind === 'conflict') {
+        failed = await resolveConflict(note, sentTitle, sentContent);
+      } else if (e.kind === 'notfound') {
+        dirty = false;
+        U.toast(e.message, 'error');
+        notes = notes.filter(function (n) { return n.id !== note.id; });
+        saving = false;
+        window.backToGallery();
+        return true;
+      } else if (e.kind === 'network') {
+        setStatus('⚠️ Sem conexão — tentando de novo…');
+        scheduleRetry();
+      } else if (e.kind === 'auth') {
+        setStatus('⚠️ Sessão expirada');
+        U.toast(e.message, 'error');
+      } else {
+        setStatus('⚠️ Erro ao salvar');
+        U.toast(e.message, 'error');
+        scheduleRetry();
+      }
+    } finally {
+      saving = false;
+    }
+
+    if (!failed) {
+      if (saveAgain || dirty) { saveAgain = false; setStatus('💾 Salvando...'); return persistCurrent(); }
+      setStatus('💾 Salvo');
+      return true;
+    }
+    return false;
+  }
+
+  function scheduleRetry() {
+    clearTimeout(retryTimer);
+    var delay = RETRY_DELAYS[Math.min(retryCount, RETRY_DELAYS.length - 1)];
+    retryCount += 1;
+    retryTimer = setTimeout(function () { if (dirty) persistCurrent(); }, delay);
+  }
+
+  /* A nota mudou no servidor desde que a abrimos (outra aba/dispositivo).
+     Retorna true se ainda há falha (nada foi gravado). */
+  async function resolveConflict(note, sentTitle, sentContent) {
+    var overwrite = window.confirm(
+      'Esta nota foi alterada em outro lugar (outra aba ou dispositivo).\n\n' +
+      'OK = sobrescrever com a SUA versão.\nCancelar = carregar a versão do servidor (suas últimas alterações aqui serão descartadas).');
+    try {
+      if (overwrite) {
+        var row = await S.notes.update(note.id, { title: sentTitle, content: sentContent }, { force: true });
+        Object.assign(note, row);
+        dirty = false;
+        return false;
+      }
+      var fresh = (await S.notes.list()).find(function (n) { return n.id === note.id; });
+      if (fresh) {
+        Object.assign(note, fresh);
+        titleInput.value = note.title || '';
+        textarea.innerHTML = U.sanitizeNoteHtml(note.content || '');
+      }
+      dirty = false;
+      return false;
+    } catch (err) {
+      setStatus('⚠️ Erro ao salvar');
+      U.reportError(err);
+      return true;
+    }
+  }
+
+  /* Última tentativa ao fechar/recarregar a aba: um PATCH com keepalive
+     sobrevive ao fechamento da página (limite do navegador: ~64 KB). */
+  function flushOnUnload() {
+    var note = currentNote();
+    if (!note || !(dirty || saving || debouncedSave.pending())) return;
+    var token = window.NianeAuth.getCachedAccessToken();
+    var cfg = window.NianeConfig;
+    if (!token || !cfg) return;
+    var body = JSON.stringify({
+      title: titleInput.value.slice(0, 200),
+      content: U.sanitizeNoteHtml(textarea.innerHTML)
+    });
+    if (body.length > 60000) return;
+    try {
+      fetch(cfg.SUPABASE_URL + '/rest/v1/notes?id=eq.' + encodeURIComponent(note.id) +
+        '&updated_at=eq.' + encodeURIComponent(note.updated_at), {
+        method: 'PATCH',
+        keepalive: true,
+        headers: {
+          'apikey': cfg.SUPABASE_PUBLIC_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: body
+      }).catch(function () { /* melhor esforço: a página já está fechando */ });
+    } catch (e) { /* melhor esforço */ }
+  }
+
+  window.addEventListener('beforeunload', function (e) {
+    if (currentId && (dirty || saving || debouncedSave.pending())) {
+      flushOnUnload();
+      e.preventDefault();
+      e.returnValue = ''; // pede confirmação enquanto há alterações não salvas
+    }
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && currentId && dirty) {
+      debouncedSave.cancel();
+      persistCurrent();
+    }
+  });
+  window.addEventListener('online', function () { if (currentId && dirty) persistCurrent(); });
 
   /* ------------------------------------------------------------------------
      Seleção de texto
@@ -370,23 +543,31 @@
   };
 
   window.confirmDelete = function () {
-    if (pendingDeleteId) {
-      notes = notes.filter(n => n.id !== pendingDeleteId);
-      persist();
-      if (currentId === pendingDeleteId) {
-        currentId = null;
-        editorView.classList.add('hidden');
-        galleryView.classList.remove('hidden');
+    var id = pendingDeleteId;
+    if (!id) { deleteModal.classList.add('hidden'); return Promise.resolve(); }
+    var btn = deleteModal.querySelector('.btn-danger');
+    return U.withBusy(btn, async function () {
+      try {
+        await S.notes.remove(id); // só some da tela depois que o banco confirmar
+        notes = notes.filter(function (n) { return n.id !== id; });
+        if (currentId === id) {
+          debouncedSave.cancel();
+          dirty = false; saving = false;
+          currentId = null;
+          editorView.classList.add('hidden');
+          galleryView.classList.remove('hidden');
+        }
+        pendingDeleteId = null;
+        deleteModal.classList.add('hidden');
+        renderGallery(currentSearch());
+      } catch (err) {
+        U.reportError(err, 'Não foi possível excluir a nota.');
       }
-    }
-    pendingDeleteId = null;
-    deleteModal.classList.add('hidden');
-    renderGallery();
+    });
   };
 
   /* ------------------------------------------------------------------------
      Init
      ------------------------------------------------------------------------ */
-  document.addEventListener('DOMContentLoaded', () => renderGallery());
-  if (document.readyState !== 'loading') renderGallery();
+  carregar();
 })();

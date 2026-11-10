@@ -15,13 +15,48 @@
             }
         }
 
+        // Redireciona só para páginas internas do NIANE (evita "open redirect").
+        function destinoSeguro() {
+            const next = new URLSearchParams(window.location.search).get('next') || '';
+            return /^(home|lists|notes|pomodoro|music|settings)\.html(\?[\w=&%.-]*)?$/.test(next) ? next : 'home.html';
+        }
+
         const loginForm = document.querySelector('.auth-card form');
         if (loginForm) {
             loginForm.addEventListener('submit', (event) => {
                 event.preventDefault();
-                fazerLogin(
-                    document.getElementById('campoEmail').value.trim(),
-                    document.getElementById('campoSenha').value
-                );
+                const botao = loginForm.querySelector('.btn-submit');
+                NianeUtils.withBusy(botao, async () => {
+                    try {
+                        await NianeAuth.signIn(
+                            document.getElementById('campoEmail').value,
+                            document.getElementById('campoSenha').value
+                        );
+                        window.location.href = destinoSeguro();
+                    } catch (err) {
+                        NianeUtils.reportError(err, 'Não foi possível entrar.');
+                    }
+                });
+            });
+        }
+
+        const linkEsqueci = document.getElementById('linkEsqueciSenha');
+        if (linkEsqueci) {
+            linkEsqueci.addEventListener('click', (event) => {
+                event.preventDefault();
+                const email = document.getElementById('campoEmail').value;
+                if (!NianeAuth.validateEmail(email)) {
+                    NianeUtils.toast('Digite seu e-mail no campo acima e clique de novo em "Esqueci minha senha".', 'info');
+                    return;
+                }
+                NianeUtils.withBusy(linkEsqueci, async () => {
+                    try {
+                        await NianeAuth.requestPasswordReset(email);
+                        // Mensagem neutra: não revela se o e-mail existe.
+                        NianeUtils.toast('Se este e-mail estiver cadastrado, você receberá um link para redefinir a senha.', 'success', 6000);
+                    } catch (err) {
+                        NianeUtils.reportError(err, 'Não foi possível enviar o e-mail.');
+                    }
+                });
             });
         }

@@ -198,3 +198,8 @@
             text-decoration: none;
         }
         .auth-footer a:hover { text-decoration: underline; }
+
+/* Link "Esqueci minha senha" */
+.link-esqueci { text-align: right; margin: -4px 0 14px; font-size: 0.82rem; }
+.link-esqueci a { color: var(--accent2); font-weight: 700; text-decoration: none; }
+.link-esqueci a:hover { text-decoration: underline; }

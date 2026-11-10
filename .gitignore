@@ -1,0 +1,19 @@
+# Credenciais e configuração local — NUNCA versionar
+.env
+.env.*
+!.env.example
+*.local
+config.local.js
+secrets.*
+*.pem
+*.key
+
+# Supabase CLI (estado local)
+supabase/.temp/
+supabase/.branches/
+
+# Dependências e sistema
+node_modules/
+.DS_Store
+Thumbs.db
+*.log

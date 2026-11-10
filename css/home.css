@@ -159,3 +159,14 @@
         text-align: center;
         flex-shrink: 0;
     }
+
+/* ===== Dashboard com dados reais (Supabase) ===== */
+.home-muted { font-size: 0.78rem; color: var(--text-muted); }
+.home-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.home-stat { background: var(--surface, #fff); border: 1.5px solid var(--accent-soft); border-radius: 14px; padding: 8px 6px; text-align: center; }
+.home-stat strong { display: block; font-size: 1.15rem; color: var(--accent2); }
+.home-stat span { font-size: 0.68rem; color: var(--text-muted); }
+.home-notes { margin-top: 14px; text-align: left; }
+.home-notes ul { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.home-notes a { font-size: 0.85rem; color: var(--accent2); text-decoration: none; font-weight: 600; }
+.home-notes a:hover { text-decoration: underline; }

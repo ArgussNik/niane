@@ -22,22 +22,28 @@
   const emailUsuario = document.getElementById('emailUsuario');
 
   async function carregarUsuario() {
-    if (!window.supabase || !loginUsuario) return;
+    if (!window.NianeApp || !loginUsuario) return;
 
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) return;
+    let usuario;
+    try { usuario = await window.NianeApp.ready; } catch (err) { return; }
+    if (!usuario) return;
 
-    const usuario = data.user;
-    const metadata = usuario.user_metadata || {};
     loginUsuario.textContent = 'Sair';
     loginUsuario.href = '#';
     loginUsuario.addEventListener('click', async (event) => {
       event.preventDefault();
-      await supabase.auth.signOut();
-      window.location.href = 'login.html';
+      try {
+        await window.NianeAuth.signOut();
+        window.location.href = 'login.html';
+      } catch (err) { window.NianeUtils.reportError(err, 'Não foi possível sair.'); }
     });
-    if (nomeUsuario) nomeUsuario.textContent = metadata.username || 'Não informado';
     if (emailUsuario) emailUsuario.textContent = usuario.email || 'Não informado';
+    try {
+      const perfil = await window.NianeServices.profile.getProfile();
+      if (nomeUsuario) nomeUsuario.textContent = (perfil && perfil.username) || 'Não informado';
+    } catch (err) {
+      window.NianeUtils.reportError(err, 'Não foi possível carregar o perfil.');
+    }
   }
 
   function preencherInputsComTemaAtual() {
@@ -107,6 +113,7 @@
   }
   function setSavedThemes(lista) {
     try { localStorage.setItem(SAVED_THEMES_KEY, JSON.stringify(lista)); } catch (e) {}
+    if (window.NianePrefs) window.NianePrefs.themeChanged(); // persiste no Supabase
   }
 
   function renderSavedThemes() {

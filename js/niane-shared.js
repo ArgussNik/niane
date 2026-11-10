@@ -214,7 +214,18 @@
         box-shadow:0 10px 30px rgba(0,0,0,.3);font-family:'DM Sans',sans-serif;color:var(--text,#1a2b35);}
       .niane-modal.niane-active{display:flex;flex-direction:column;}
       #niane-popup-config.niane-active{width:90%;max-width:480px;padding:24px;max-height:85vh;overflow-y:auto;}
-      #niane-popup-usuario.niane-active{align-items:stretch;width:88%;max-width:820px;min-height:360px;padding:40px;}
+      #niane-popup-usuario.niane-active{align-items:stretch;width:90%;max-width:460px;max-height:88vh;overflow-y:auto;padding:24px;}
+      .niane-user-head{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:8px;}
+      .niane-user-email{font-size:.88rem;color:var(--text-muted,#6b8fa0);word-break:break-all;text-align:center;}
+      .niane-user-form{display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+      .niane-user-form label{font-size:.78rem;font-weight:700;color:var(--text-muted,#6b8fa0);}
+      .niane-user-form input[type=text],.niane-user-form input[type=password]{width:100%;box-sizing:border-box;padding:9px 12px;
+        border:1.5px solid var(--accent-soft,#B2E6F5);border-radius:12px;background:var(--surface,#fff);color:var(--text,#1a2b35);font:inherit;}
+      .niane-user-form input:focus{outline:2px solid var(--accent2,#3AADD4);outline-offset:1px;}
+      .niane-btn-primary,.niane-btn-ghost{border:none;border-radius:999px;padding:9px 18px;font:700 .85rem 'DM Sans',sans-serif;cursor:pointer;}
+      .niane-btn-primary{color:#fff;background:linear-gradient(135deg,var(--accent,#5BC4E8),var(--accent2,#1f8ecd));}
+      .niane-btn-ghost{color:var(--accent2,#3AADD4);background:var(--surface2,#D8F0FA);}
+      .niane-btn-primary:disabled,.niane-btn-ghost:disabled{opacity:.6;cursor:progress;}
       #niane-popup-saved-themes.niane-active{width:90%;max-width:480px;padding:24px;max-height:85vh;overflow-y:auto;}
       .niane-heading{font-family:'Syne',sans-serif;text-align:center;margin:0;font-size:1.9rem;font-weight:800;color:var(--accent2,#3AADD4);}
       .niane-subheading{font-family:'Syne',sans-serif;text-align:center;margin:14px 0 4px;font-size:1.1rem;font-weight:700;}
@@ -314,14 +325,28 @@
         <button class="niane-close-btn" id="niane-close-usuario">
           <img src="../assets/images/fechar.png" alt="Fechar" onerror="this.parentElement.textContent='✕'">
         </button>
-        <p>Usuário:</p><br>
-        <center>
-          <a href="login.html" style="color:var(--accent2,#3AADD4);">Login necessário</a>
-          <br><br>
-          <img class="niane-avatar" src="../assets/images/user.png" alt="Avatar do usuário">
-          <p style="margin-top:14px;">Nome de usuário:</p>
-          <p>E-mail:</p>
-        </center>
+        <h2 class="niane-heading" style="font-size:1.5rem;">Usuário</h2>
+        <div class="niane-user-head">
+          <img class="niane-avatar" style="width:84px;height:84px;" src="../assets/images/user.png" alt="Avatar do usuário">
+          <span class="niane-user-email" id="niane-user-email">Carregando…</span>
+        </div>
+        <form class="niane-user-form" id="niane-profile-form">
+          <label for="niane-user-username">Nome de usuário</label>
+          <input type="text" id="niane-user-username" maxlength="60" autocomplete="username">
+          <label for="niane-user-fullname">Nome completo</label>
+          <input type="text" id="niane-user-fullname" maxlength="120" autocomplete="name">
+          <button type="submit" class="niane-btn-primary" id="niane-profile-save">Salvar perfil</button>
+        </form>
+        <hr class="niane-hr">
+        <form class="niane-user-form" id="niane-password-form">
+          <label for="niane-user-newpass">Nova senha (mínimo 8 caracteres)</label>
+          <input type="password" id="niane-user-newpass" autocomplete="new-password" minlength="8">
+          <label for="niane-user-newpass2">Confirmar nova senha</label>
+          <input type="password" id="niane-user-newpass2" autocomplete="new-password" minlength="8">
+          <button type="submit" class="niane-btn-ghost" id="niane-password-save">Alterar senha</button>
+        </form>
+        <hr class="niane-hr">
+        <button type="button" class="niane-btn-primary" id="niane-logout-btn">Sair da conta</button>
       </div>
 
       <div class="niane-modal" id="niane-popup-saved-themes">
@@ -394,6 +419,7 @@
     }
     function setSavedThemes(lista) {
       try { localStorage.setItem(SAVED_THEMES_KEY, JSON.stringify(lista)); } catch (e) {}
+      if (window.NianePrefs) window.NianePrefs.themeChanged(); // persiste no Supabase
     }
 
     const savedGrid = document.getElementById('niane-saved-grid');
@@ -459,7 +485,73 @@
       el.addEventListener('click', (e) => { e.preventDefault(); abrirPopup(popupConfig); });
     });
     document.querySelectorAll('#nav-usuario, [data-niane="usuario"]').forEach(el => {
-      el.addEventListener('click', (e) => { e.preventDefault(); abrirPopup(popupUsuario); });
+      el.addEventListener('click', (e) => { e.preventDefault(); abrirPopup(popupUsuario); carregarPerfilNoPopup(); });
+    });
+
+    /* ---- Usuário: perfil, senha e logout (Supabase) ---- */
+    const emailEl = document.getElementById('niane-user-email');
+    const usernameInput = document.getElementById('niane-user-username');
+    const fullnameInput = document.getElementById('niane-user-fullname');
+    const profileForm = document.getElementById('niane-profile-form');
+    const passwordForm = document.getElementById('niane-password-form');
+    const logoutBtn = document.getElementById('niane-logout-btn');
+
+    function carregarPerfilNoPopup() {
+      const app = window.NianeApp;
+      const svc = window.NianeServices && window.NianeServices.profile;
+      if (!app || !svc) {
+        emailEl.textContent = 'Faça login para ver seu perfil.';
+        return;
+      }
+      app.ready.then((user) => {
+        emailEl.textContent = user.email || '';
+        return svc.getProfile();
+      }).then((profile) => {
+        if (!profile) return;
+        usernameInput.value = profile.username || '';
+        fullnameInput.value = profile.full_name || '';
+      }).catch((err) => {
+        if (window.NianeUtils) window.NianeUtils.reportError(err, 'Não foi possível carregar o perfil.');
+      });
+    }
+
+    profileForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const U = window.NianeUtils;
+      U.withBusy(document.getElementById('niane-profile-save'), async () => {
+        try {
+          await window.NianeServices.profile.updateProfile({
+            username: usernameInput.value,
+            full_name: fullnameInput.value
+          });
+          U.toast('Perfil atualizado!', 'success');
+        } catch (err) { U.reportError(err, 'Não foi possível salvar o perfil.'); }
+      });
+    });
+
+    passwordForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const U = window.NianeUtils;
+      const nova = document.getElementById('niane-user-newpass').value;
+      const confirma = document.getElementById('niane-user-newpass2').value;
+      if (nova !== confirma) { U.toast('As senhas não conferem.', 'error'); return; }
+      U.withBusy(document.getElementById('niane-password-save'), async () => {
+        try {
+          await window.NianeAuth.updatePassword(nova);
+          passwordForm.reset();
+          U.toast('Senha alterada com sucesso!', 'success');
+        } catch (err) { U.reportError(err, 'Não foi possível alterar a senha.'); }
+      });
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      const U = window.NianeUtils;
+      U.withBusy(logoutBtn, async () => {
+        try {
+          await window.NianeAuth.signOut();
+          window.location.href = 'login.html';
+        } catch (err) { U.reportError(err, 'Não foi possível sair.'); }
+      });
     });
 
     window.NianeAbrirConfig = () => abrirPopup(popupConfig);
@@ -797,7 +889,9 @@
       accountedSeconds: 0,         // quanto da fase atual já foi somado nas estatísticas da Home
       running: false,
       endAt: null,                 // epoch ms em que a fase termina; válido quando running=true
-      finishedLoopMessage: false
+      finishedLoopMessage: false,
+      sessionId: null,             // UUID da fase em andamento (usado para gravar a sessão no Supabase sem duplicar)
+      phaseStartedAt: null         // epoch ms em que a fase realmente começou
     };
   }
 
@@ -850,6 +944,64 @@
     return s;
   }
 
+  /* ---- Registro de sessões no Supabase ---------------------------------
+     Cada fase tem um UUID gerado ao iniciar. Quando ela termina, a sessão é
+     gravada com esse id (idempotente: abas repetidas ou reenvios não
+     duplicam). Se a gravação falhar, a sessão entra numa fila local e é
+     reenviada na próxima abertura de página. */
+  const SESSION_TYPE = { focus: 'focus', short: 'short_break', long: 'long_break' };
+
+  function newSessionId() {
+    return window.NianeUtils ? window.NianeUtils.uuid() : null;
+  }
+
+  function pendingKey(uid) { return 'niane-pomodoro-pending:' + uid; }
+  function readPending(uid) {
+    try { return JSON.parse(localStorage.getItem(pendingKey(uid))) || []; } catch (e) { return []; }
+  }
+  function writePending(uid, list) {
+    try {
+      if (list.length) localStorage.setItem(pendingKey(uid), JSON.stringify(list));
+      else localStorage.removeItem(pendingKey(uid));
+    } catch (e) { /* storage indisponível: sem fila local */ }
+  }
+
+  function sendPomodoroSession(uid, session, announce) {
+    const svc = window.NianeServices && window.NianeServices.pomodoro;
+    if (!svc) return Promise.resolve();
+    return svc.recordCompleted(session).then(() => {
+      writePending(uid, readPending(uid).filter((x) => x.id !== session.id));
+      if (announce && session.session_type === 'focus' && window.NianeUtils) {
+        window.NianeUtils.toast('Sessão de foco registrada ✓', 'success');
+      }
+    }).catch((err) => {
+      const pend = readPending(uid);
+      if (!pend.some((x) => x.id === session.id)) { pend.push(session); writePending(uid, pend); }
+      if (window.NianeUtils) window.NianeUtils.reportError(err, 'Não foi possível registrar a sessão. Vamos tentar de novo depois.');
+    });
+  }
+
+  // Chamado quando uma fase chegou ao fim (antes de o estado mudar de fase).
+  function recordFinishedPhase(s) {
+    const uid = window.NianeAuth && window.NianeAuth.currentUserIdSync();
+    if (!uid || !s.sessionId) return;
+    const finished = s.endAt || Date.now();
+    const started = s.phaseStartedAt || (finished - s.phaseTotalSeconds * 1000);
+    sendPomodoroSession(uid, {
+      id: s.sessionId,
+      session_type: SESSION_TYPE[s.currentPhase] || 'focus',
+      duration_minutes: Math.max(1, Math.round(s.phaseTotalSeconds / 60)),
+      started_at: started,
+      finished_at: finished
+    }, true);
+  }
+
+  function flushPendingSessions() {
+    const uid = window.NianeAuth && window.NianeAuth.currentUserIdSync();
+    if (!uid) return;
+    readPending(uid).forEach((session) => { sendPomodoroSession(uid, session, false); });
+  }
+
   function pomodoroSetPhase(s, phase, autoStart) {
     s.currentPhase = phase;
     s.phaseTotalSeconds = pomodoroPhaseMinutes(s, phase) * 60;
@@ -858,9 +1010,13 @@
     s.running = false;
     s.endAt = null;
     s.finishedLoopMessage = false;
+    s.sessionId = null;
+    s.phaseStartedAt = null;
     if (autoStart) {
       s.running = true;
       s.endAt = Date.now() + s.phaseTotalSeconds * 1000;
+      s.sessionId = newSessionId();
+      s.phaseStartedAt = Date.now();
     }
     return s;
   }
@@ -890,6 +1046,9 @@
     while (s.running && pomodoroRemaining(s) <= 0 && guard < 1000) {
       guard += 1;
       s = pomodoroAccount(s); // credita o que sobrou da fase que terminou
+      recordFinishedPhase(s);  // grava a sessão concluída no Supabase
+      s.sessionId = null;
+      s.phaseStartedAt = null;
       if (s.autoLoopEnabled) {
         s = pomodoroAdvance(s);
       } else {
@@ -925,6 +1084,10 @@
     s.running = true;
     s.endAt = Date.now() + s.remainingSeconds * 1000;
     s.finishedLoopMessage = false;
+    if (!s.sessionId) {
+      s.sessionId = newSessionId();
+      s.phaseStartedAt = Date.now() - (s.phaseTotalSeconds - s.remainingSeconds) * 1000;
+    }
     setPomodoroState(s);
     pomodoroRenderAll(s);
     return s;
@@ -984,6 +1147,22 @@
     if (vals && vals.longBreakMinutes) s.longBreakMinutes = vals.longBreakMinutes;
     if (vals && vals.totalCycles) s.totalCycles = vals.totalCycles;
     if (!s.running) s = pomodoroSetPhase(s, s.currentPhase, false);
+    setPomodoroState(s);
+    pomodoroRenderAll(s);
+    if (window.NianePrefs) window.NianePrefs.pomodoroChanged(s); // persiste no Supabase (user_settings)
+    return s;
+  }
+
+  // Aplica os tempos que vieram do servidor (sem reenviá-los ao servidor).
+  function pomodoroApplyRemoteSettings(vals) {
+    let s = getPomodoroState();
+    let changed = false;
+    ['focusMinutes', 'breakMinutes', 'longBreakMinutes', 'totalCycles'].forEach((k) => {
+      if (vals && Number(vals[k]) > 0 && s[k] !== Number(vals[k])) { s[k] = Number(vals[k]); changed = true; }
+    });
+    if (!changed) return s;
+    // só reinicia a contagem se o timer estiver parado "no zero" (não mexe numa pausa no meio)
+    if (!s.running && s.remainingSeconds === s.phaseTotalSeconds) s = pomodoroSetPhase(s, s.currentPhase, false);
     setPomodoroState(s);
     pomodoroRenderAll(s);
     return s;
@@ -1065,6 +1244,7 @@
     setActiveModeManual: pomodoroSetActiveModeManual,
     setAutoLoop: pomodoroSetAutoLoop,
     applyCustomTimes: pomodoroApplyCustomTimes,
+    applyRemoteSettings: pomodoroApplyRemoteSettings,
     onUpdate: pomodoroOnUpdate,
     phaseLabel: pomodoroPhaseLabel,
     formatTime: pomodoroFormatTime
@@ -1089,6 +1269,10 @@
     }
 
     initPomodoro();
+
+    if (window.NianeApp && window.NianeApp.ready) {
+      window.NianeApp.ready.then(flushPendingSessions).catch(() => {});
+    }
   });
 
   // Expõe utilidades para as páginas que precisarem interagir diretamente

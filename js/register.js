@@ -19,11 +19,24 @@
         if (registerForm) {
             registerForm.addEventListener('submit', (event) => {
                 event.preventDefault();
-                cadastrarUsuario(
-                    document.getElementById('campoEmail').value.trim(),
-                    document.getElementById('campoSenha').value,
-                    document.getElementById('campoUsuario').value.trim(),
-                    document.getElementById('campoAtualizacoes').checked
-                );
+                const botao = registerForm.querySelector('.btn-submit');
+                NianeUtils.withBusy(botao, async () => {
+                    try {
+                        const resultado = await NianeAuth.signUp(
+                            document.getElementById('campoEmail').value,
+                            document.getElementById('campoSenha').value,
+                            document.getElementById('campoUsuario').value,
+                            document.getElementById('campoAtualizacoes').checked
+                        );
+                        if (resultado.needsConfirmation) {
+                            NianeUtils.toast('Cadastro feito! Verifique seu e-mail para confirmar a conta.', 'success', 6000);
+                            setTimeout(() => { window.location.href = 'login.html'; }, 2500);
+                        } else {
+                            window.location.href = 'home.html';
+                        }
+                    } catch (err) {
+                        NianeUtils.reportError(err, 'Não foi possível cadastrar.');
+                    }
+                });
             });
         }

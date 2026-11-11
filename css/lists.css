@@ -399,3 +399,13 @@ nav {
 
 
 
+
+/* ===== Integração Supabase: progresso por lista e ordenação por arrastar ===== */
+.list-progress { display: flex; align-items: center; gap: 10px; margin: 2px 0 12px; }
+.list-progress-bar { flex: 1; height: 6px; border-radius: 999px; background: var(--accent-soft, #B2E6F5); overflow: hidden; }
+.list-progress-fill { height: 100%; border-radius: 999px; background: var(--accent3, #3AADD4); transition: width .3s ease; }
+.list-progress-text { font-size: 0.72rem; color: var(--text-muted, #6b8fa0); white-space: nowrap; }
+.task-item[draggable="true"] { cursor: grab; }
+.task-item.dragging { opacity: 0.45; }
+.task-item.drag-over-top { box-shadow: 0 -3px 0 0 var(--accent2, #3AADD4); }
+.task-item.drag-over-bottom { box-shadow: 0 3px 0 0 var(--accent2, #3AADD4); }

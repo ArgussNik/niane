@@ -45,6 +45,8 @@
                 <input type="text" name="Usuario" id="campoUsuario" placeholder="Seu nome de usuário">
             </div>
 
+            <p class="link-esqueci"><a href="#" id="linkEsqueciSenha">Esqueci minha senha</a></p>
+
 
             <button type="submit" class="btn-submit">Entrar</button>
 
@@ -57,22 +59,18 @@
             Não tem uma conta? <a href="register.html">Cadastre-se</a>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/supabase.js"></script>
-    <script>
-  async function fazerLogin(email, senha) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: senha
-    });
-
-    if (error) {
-      alert("Erro ao entrar: " + error.message);
-    } else {
-      window.location.href = "lists.html";
-    }
-  }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/services/profile.service.js"></script>
+  <script src="../js/services/tasks.service.js"></script>
+  <script src="../js/services/lists.service.js"></script>
+  <script src="../js/services/notes.service.js"></script>
+  <script src="../js/services/pomodoro.service.js"></script>
+  <script src="../js/services/dashboard.service.js"></script>
+  <script src="../js/services/migration.service.js"></script>
+  <script src="../js/app.js"></script>
     <script src="../js/niane-shared.js" defer></script>
     <script src="../js/login.js"></script>
 

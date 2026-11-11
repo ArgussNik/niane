@@ -129,10 +129,15 @@
   }
 
   /* Deriva + aplica + salva de uma vez (usado pelos botões de cor). */
+  var changeListeners = [];
+  function onChange(fn) { changeListeners.push(fn); }
+
   function applyTheme(bg, text, accentBase, accentBase2) {
     var palette = derivePalette(bg, text, accentBase, accentBase2);
     applyPalette(palette);
     try { localStorage.setItem(THEME_KEY, JSON.stringify(palette)); } catch (e) {}
+    // avisa quem quiser persistir o tema (ex.: sincronização com o Supabase)
+    changeListeners.forEach(function (fn) { try { fn(palette); } catch (e) { console.error(e); } });
     return palette;
   }
 
@@ -149,6 +154,7 @@
     derivePalette: derivePalette,
     applyPalette: applyPalette,
     loadSavedPalette: loadSavedPalette,
-    applyTheme: applyTheme
+    applyTheme: applyTheme,
+    onChange: onChange
   };
 })();

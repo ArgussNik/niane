@@ -130,6 +130,95 @@ E acesse `http://localhost:5500/pages/login.html`.
 
 ---
 
+## 🔌 Integração com o Supabase (front-end + back-end)
+
+Os dados de cada usuário (listas, tarefas, notas, sessões Pomodoro, perfil e preferências) ficam no **Supabase (PostgreSQL)**. O projeto continua sendo **HTML + CSS + JavaScript puro**, sem framework e sem servidor Node.
+
+### Estrutura de arquivos relevante
+
+```
+js/
+  supabase.js        # cria o cliente Supabase (único lugar com URL + chave pública)
+  utils.js           # erros padronizados, toast, estados de tela, sanitização, debounce
+  auth.js            # cadastro, login, logout, recuperar/alterar senha, sessão
+  app.js             # guarda de páginas protegidas + sincronização de preferências
+  services/
+    lists.service.js  tasks.service.js  notes.service.js
+    pomodoro.service.js  profile.service.js  dashboard.service.js
+    migration.service.js   # importa dados antigos do localStorage (uma única vez)
+pages/reset-password.html  # destino do link "Esqueci minha senha"
+supabase/migrations/       # SQL versionado (veja abaixo)
+docs/GUIA-INICIANTES.md    # como HTML, JS e Supabase conversam
+```
+
+Os scripts são *classic scripts* (não ES Modules) de propósito: assim o projeto continua funcionando abrindo os arquivos direto no navegador (`file://`) e com os `onclick` já existentes nos HTMLs. Cada módulo expõe um objeto global (`NianeAuth`, `NianeUtils`, `NianeServices.*`).
+
+### Configuração do Supabase
+
+1. **Cliente:** `js/supabase.js` já aponta para o projeto NIANE. A URL e a chave `anon` são **públicas por natureza**; a segurança vem do RLS. **Nunca** coloque `service_role`, senhas ou tokens administrativos no repositório (o `.gitignore` já bloqueia `.env*`, `*.local` e chaves).
+2. **Autenticação (painel do Supabase → Authentication):**
+   - *Providers → Email*: habilitado (confirmação de e-mail recomendada).
+   - *URL Configuration → Site URL* e *Redirect URLs*: adicione as URLs onde o app roda (ex.: `http://localhost:5500/pages/login.html`, `http://localhost:5500/pages/reset-password.html` e as URLs de produção). **Sem isso o link de recuperação de senha não funciona.**
+3. **Banco:** execute as migrações (próxima seção).
+
+### Migrações SQL
+
+Arquivos em `supabase/migrations/`, para executar **em ordem** no *SQL Editor* do Supabase (ou com `supabase db push`):
+
+| Arquivo | O que faz |
+|---|---|
+| `001_initial_schema.sql` | Cria as tabelas, chaves, checks e índices. **Atenção:** começa removendo tabelas legadas (`DROP TABLE`) — leia o cabeçalho antes de rodar em um banco com dados. |
+| `002_rls_policies.sql` | Liga o RLS e cria as políticas SELECT/INSERT/UPDATE/DELETE por `auth.uid()`. Revoga acesso do papel `anon`. |
+| `003_triggers_and_functions.sql` | `updated_at` automático, bloqueio de troca de `user_id`, criação automática de `profiles` + `user_settings` ao cadastrar. |
+
+### Tabelas
+
+| Tabela | Conteúdo | Observações |
+|---|---|---|
+| `profiles` | `id` (= `auth.users.id`), `username`, `full_name`, `avatar_url` | criada por trigger no cadastro |
+| `lists` | `user_id`, `title`, `period_label`, `start_date`, `end_date`, `position` | |
+| `tasks` | `list_id`, `user_id`, `title`, `description`, `is_completed`, `priority`, `due_date`, `due_time`, `position`, `completed_at` | `ON DELETE CASCADE` a partir de `lists` |
+| `notes` | `user_id`, `title`, `content` (HTML sanitizado) | |
+| `pomodoro_sessions` | `user_id`, `duration_minutes`, `session_type` (`focus`/`short_break`/`long_break`), `completed`, `started_at`, `finished_at` | `id` gerado no navegador → gravação idempotente |
+| `user_settings` | `user_id` (único), `theme` (jsonb), tempos do Pomodoro, `total_cycles` | criada por trigger |
+
+### Regras de segurança
+
+- **RLS ligado em todas as tabelas**; o papel `anon` não tem acesso a nenhuma.
+- Todas as políticas comparam `user_id = auth.uid()` (em `profiles`, `id = auth.uid()`).
+- `tasks` só aceita `INSERT`/`UPDATE` se a `list_id` pertencer ao próprio usuário.
+- Um trigger impede alterar o `user_id` de um registro.
+- O navegador **não envia** `user_id`: o banco usa `auth.uid()` como padrão.
+- Notas passam por um sanitizador (lista de tags/estilos permitidos) antes de serem gravadas e exibidas; textos de usuário são renderizados com `textContent`/escape.
+- O Supabase Auth guarda a senha com hash; o front-end nunca a armazena.
+
+### Como executar localmente
+
+```bash
+git clone https://github.com/ArgussNik/niane.git
+cd niane
+python3 -m http.server 5500      # ou Live Server do VS Code
+# abra http://localhost:5500/pages/register.html
+```
+
+### Como testar
+
+1. **Fluxo manual:** cadastre-se → confirme o e-mail (se a confirmação estiver ativa) → entre → crie lista/tarefas/notas → rode um Pomodoro até o fim → confira a Home → saia e entre de novo (os dados voltam).
+2. **Isolamento entre usuários (SQL Editor):** crie dois usuários, e como o usuário B (`set local role authenticated` + `request.jwt.claims`) tente ler, alterar, apagar e inserir registros do usuário A. O resultado esperado é sempre 0 linhas ou erro `42501`.
+3. **DevTools:** sem erros no *Console* e sem respostas 4xx/5xx inesperadas na aba *Network*.
+4. Rode também o *Security Advisor* do Supabase (Database → Advisors) — não deve apontar tabelas sem RLS.
+
+### Limitações conhecidas
+
+- Dados que já estavam no `localStorage` (versões antigas) são importados **para a primeira conta que entrar naquele navegador** (uma vez; é mantido um backup `*-migrated-backup`).
+- Ordenar tarefas funciona por arrastar e soltar com mouse (sem suporte a toque ainda).
+- A busca de notas é feita no navegador sobre as notas já carregadas.
+- A coluna `user_settings.theme` guarda o tema e a lista de temas salvos; o Pomodoro em andamento (cronômetro) continua local ao navegador, só o histórico de sessões concluídas e os tempos configurados vão para o banco.
+- A música continua usando apenas as fontes de áudio já existentes; nenhum áudio é guardado no banco.
+- A biblioteca supabase-js é carregada da CDN jsDelivr (versão fixada).
+
+---
+
 ## 🎨 Design e prototipação
 
 Antes da implementação, as interfaces foram planejadas no **Figma**, o que permitiu estruturar a experiência do usuário e definir a identidade visual da aplicação.

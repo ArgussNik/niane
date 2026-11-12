@@ -280,7 +280,16 @@ Projeto desenvolvido por:
 
 > Capturas da aplicação serão adicionadas em breve.
 
----
+---<img width="1919" height="1029" alt="Captura de tela de 2026-11-11 22-36-30" src="https://github.com/user-attachments/assets/5a011112-a45a-4d0c-9b5c-71c1d32ce965" />
+<img width="1919" height="1025" alt="Captura de tela de 2026-11-11 22-37-18" src="https://github.com/user-attachments/assets/66ebc7a1-2259-4fd9-a27e-7235bc6a058d" />
+<img width="1919" height="1030" alt="Captura de tela de 2026-11-11 22-37-52" src="https://github.com/user-attachments/assets/46d4c407-dfd0-4009-a9e8-07552ecc5bad" />
+<img width="1919" height="1028" alt="Captura de tela de 2026-11-11 22-37-38" src="https://github.com/user-attachments/assets/<img width="1919" height="1027" alt="Captura de tela de 2026-11-11 22-38-53" src="https://github.com/user-attachments/assets/ec3c4b6f-90af-44f5-81c4-21348a41e0a3" />
+<img width="1918" height="1025" alt="Captura de tela de 2026-11-11 22-38-36" src="https://github.com/user-attachments/assets/c25b8300-d7e3-487c-972c-a6ac3873d2f8" />
+<img width="1919" height="1028" alt="Captura de tela de 2026-11-11 22-38-12" src="https://github.com/user-attachments/assets/d26ba633-2f29-42ae-ad3f-d13299d03233" />
+1b1ed5e0-6720-40c2-926f-03da36b790dc" />
+
+
+
 
 ## 🤝 Contribuindo
 
